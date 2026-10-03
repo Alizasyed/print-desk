@@ -265,6 +265,7 @@
     const has = state.files.length > 0;
     $('#download').disabled = !has;
     $('#openPrint').disabled = !has;
+    $('#printNow').disabled = !has;
     if (!has) {
       state.built = null;
       setSummary('Add a file to begin.');
@@ -369,7 +370,7 @@
     try { localStorage.setItem('printdesk.printer', $('#printer').value); } catch (e) { /* ignore */ }
     schedule();
   });
-  $$('#manualRow [data-pass]').forEach((b) => b.addEventListener('click', () => exportPDF(true, b.dataset.pass)));
+  $$('#manualRow [data-pass]').forEach((b) => b.addEventListener('click', () => printPDF(b.dataset.pass)));
 
   const go = (d) => { const t = state.idx + d; if (t >= 0 && t < state.units.length) { state.idx = t; renderUnit(state.token); } };
   $('#prev').addEventListener('click', () => go(-1));
@@ -400,6 +401,31 @@
       setSummary(e.message || 'Could not create the PDF.', true);
     }
   }
+  async function printPDF(pass) {
+    try {
+      setSummary('Preparing to print…');
+      const o = options(true);
+      if (pass) o.output = pass;
+      const r = await PrintEngine.build(PDFLib, sources(), o);
+      const url = URL.createObjectURL(new Blob([r.bytes], { type: 'application/pdf' }));
+      const frame = document.createElement('iframe');
+      frame.setAttribute('aria-hidden', 'true');
+      frame.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none';
+      let done = false;
+      const fallback = () => { if (done) return; done = true; window.open(url, '_blank'); setSummary('Your browser blocked direct printing, so the PDF opened in a new tab. Press Print there.'); };
+      frame.onload = () => setTimeout(() => {
+        if (done) return;
+        try { frame.contentWindow.focus(); frame.contentWindow.print(); done = true; rebuild(); } catch (err) { fallback(); }
+      }, 400);
+      frame.src = url;
+      document.body.append(frame);
+      setTimeout(() => { frame.remove(); URL.revokeObjectURL(url); }, 120000);
+      setTimeout(() => { if (!done) fallback(); }, 6000);
+    } catch (e) {
+      setSummary(e.message || 'Could not prepare the print job.', true);
+    }
+  }
+  $('#printNow').addEventListener('click', () => printPDF());
   $('#download').addEventListener('click', () => exportPDF(false));
   $('#openPrint').addEventListener('click', () => exportPDF(true));
 
