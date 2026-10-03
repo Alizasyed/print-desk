@@ -64,6 +64,10 @@
               <option value="6">6 sheets (24 pages)</option><option value="8">8 sheets (32 pages)</option>
             </select>
           </label>
+          <label>Stapling
+            <select id="staples"><option value="2">Staple at the fold, 2 staples</option><option value="3">Staple at the fold, 3 staples</option><option value="0">Fold only, no staple marks</option></select>
+            <span class="hint">Light grey guide marks print on the fold, on the inside of each sheet.</span>
+          </label>
           <label>Extra space at the spine <input class="dim" id="gutter" type="number" min="0" step="any" value="0"></label>
           <label>Creep per sheet <input class="dim" id="creep" type="number" min="0" step="any" value="0">
             <span class="hint">Shifts inner sheets toward the spine so a thick booklet trims evenly.</span></label>
@@ -79,6 +83,11 @@
           <label>Page order
             <select id="order"><option value="rows">In reading order</option><option value="stack">Cut and stack (pages come out in order after cutting)</option></select>
           </label>
+          <label>Stapling or binding
+            <select id="nupStaple"><option value="none">None</option><option value="corner">Staple one corner (top left)</option><option value="edge">Staple twice down the left edge</option></select>
+            <span class="hint">Leaves extra room on the binding edge and prints a grey guide mark. With double-sided on, the mark and room switch sides on the backs so they line up.</span>
+          </label>
+          <label>Space for the staple <input class="dim" id="nupGutter" type="number" min="0" step="any" value="0"></label>
           <label class="check"><input type="checkbox" id="repeat"> Repeat the same page in every position (business cards, labels)</label>
           <label class="check"><input type="checkbox" id="duplex" checked> Print on both sides of each sheet</label>
           <label data-when="duplex">Printer flips on

@@ -151,13 +151,13 @@
       customPaper: [dim('customW') || 612, dim('customH') || 792],
       orientation: $('#orientation').value,
       margins: { top: m, left: m, bottom: m, right: m },
-      pad: dim('pad'), gutter: dim('gutter'), creep: dim('creep'),
+      pad: dim('pad'), gutter: layoutValue() === 'nup' ? dim('nupGutter') : dim('gutter'), creep: dim('creep'),
       scaling: $('#scaling').value,
       reverse: $('#reverse').checked,
       duplex: $('#duplex').checked,
       flip: $('#flip').value,
-      booklet: { binding: $('#binding').value, sig: parseInt($('#sig').value, 10) || 0 },
-      nup: { across: int('across', 1, 12), down: int('down', 1, 12), repeat: $('#repeat').checked, order: $('#order').value, gap: dim('gap') },
+      booklet: { binding: $('#binding').value, sig: parseInt($('#sig').value, 10) || 0, staples: parseInt($('#staples').value, 10) || 0 },
+      nup: { across: int('across', 1, 12), down: int('down', 1, 12), repeat: $('#repeat').checked, order: $('#order').value, gap: dim('gap'), staple: $('#nupStaple').value },
       poster: { w: dim('posterW') || 72, h: dim('posterH') || 72, mode: radio === 'banner' ? 'crop' : $('#posterMode').value, overlap: dim('overlap') },
       marks: $('#marks').value,
       border: $('#border').checked,
@@ -285,6 +285,11 @@
       } else {
         setSummary(`${i.sourcePages} page${i.sourcePages > 1 ? 's' : ''} on ${i.physicalSheets} sheet${i.physicalSheets > 1 ? 's' : ''} of paper${i.saved ? ` · ${i.saved}% paper saved` : ''}`);
       }
+      if (i.finished && l !== 'poster' && l !== 'banner') {
+        const u = state.unit;
+        const f = (pt) => (pt / PT[u]).toFixed(u === 'in' ? 1 : 0);
+        $('#summary').textContent += ` · pages ${f(i.finished[0])} × ${f(i.finished[1])} ${u}`;
+      }
       const ol = $('#howtoList');
       ol.innerHTML = '';
       i.instructions.forEach((t) => ol.append(Object.assign(document.createElement('li'), { textContent: t })));
@@ -356,6 +361,9 @@
     stage.replaceChildren(frag);
   }
 
+  $('#nupStaple').addEventListener('change', () => {
+    if ($('#nupStaple').value !== 'none' && !dim('nupGutter')) setDim('nupGutter', 0.5 * PT.in);
+  });
   $('#printer').addEventListener('change', () => {
     if ($('#printer').value === 'l3250') setDim('margin', 3 * PT.mm);
     try { localStorage.setItem('printdesk.printer', $('#printer').value); } catch (e) { /* ignore */ }

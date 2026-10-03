@@ -31,8 +31,8 @@
     reverse: false,
     duplex: true, // n-up only: print the back of each sheet too
     flip: 'long', // long | short: which paper edge the printer flips on
-    booklet: { binding: 'left', sig: 0 }, // sig = sheets per signature, 0 = one booklet
-    nup: { across: 2, down: 2, repeat: false, order: 'rows', gap: 0 }, // order: rows | stack
+    booklet: { binding: 'left', sig: 0, staples: 0 }, // staples: guide marks on the fold, 0 = none; sig = sheets per signature, 0 = one booklet
+    nup: { across: 2, down: 2, repeat: false, order: 'rows', gap: 0, staple: 'none' }, // order: rows | stack
     poster: { w: 1728, h: 2592, mode: 'fit', overlap: 36 }, // mode: stretch | fit | crop
     marks: 'ticks', // none | ticks | lines
     border: false,
@@ -112,13 +112,19 @@
           ['back', rtl ? [m - 2 - 2 * s, 2 * s + 1] : [2 * s + 1, m - 2 - 2 * s]],
         ];
         for (const [side, pair] of sides) {
+          const st = [];
+          const n = o.booklet.staples;
+          if (n && side === 'back') {
+            const ys = n === 3 ? [0.2, 0.5, 0.8] : [0.25, 0.75];
+            ys.forEach((f) => st.push({ type: 'staple', keep: true, x1: W / 2 - 25, y1: H * f, x2: W / 2 + 25, y2: H * f }));
+          }
           plan.push({
             W, H, side,
             cells: pair.map((pi, ci) => ({
               x: A.x + ci * half, y: A.y, w: half, h: A.h,
               item: pad[pi], spine: ci === 0 ? 'right' : 'left', creep: s, outer: ci === 0 ? 'left' : 'right',
             })),
-            marks: [{ type: 'fold', x1: W / 2, y1: 0, x2: W / 2, y2: H }],
+            marks: [{ type: 'fold', x1: W / 2, y1: 0, x2: W / 2, y2: H }].concat(st),
           });
         }
       }
@@ -211,9 +217,25 @@
     }
 
     const plan = [];
+    const stapleOn = o.nup.staple && o.nup.staple !== 'none';
     for (let i = 0; i < S; i++) {
       for (let t = 0; t < sides; t++) {
         const cells = [];
+        const flipped = t === 1;
+        const edgeRight = flipped && mirrorCols; // the binding edge ends up on the right of the back
+        const cornerBottom = flipped && !mirrorCols && sides === 2;
+        const sm = [];
+        if (stapleOn) {
+          const x0 = edgeRight ? W : 0;
+          const dir = edgeRight ? -1 : 1;
+          if (o.nup.staple === 'corner') {
+            const y0 = cornerBottom ? 0 : H;
+            const dy = cornerBottom ? 1 : -1;
+            sm.push({ type: 'staple', keep: true, x1: x0 + dir * 4, y1: y0 + dy * 30, x2: x0 + dir * 30, y2: y0 + dy * 4 });
+          } else {
+            [0.25, 0.75].forEach((f) => sm.push({ type: 'staple', keep: true, x1: x0 + dir * 4, y1: H * f, x2: x0 + dir * 28, y2: H * f }));
+          }
+        }
         for (let j = 0; j < N; j++) {
           const r0 = Math.floor(j / A);
           const c0 = j % A;
@@ -224,9 +246,14 @@
           if (repeat) idx = i * sides + t;
           else if (stack) idx = (j * S + i) * sides + t;
           else idx = i * N * sides + t * N + j;
-          cells.push(Object.assign(gm.cell(r, c), { item: items[idx] || null, outer: sides === 2 ? (t === 0 ? 'right' : 'left') : 'right' }));
+          const cell = Object.assign(gm.cell(r, c), { item: items[idx] || null, outer: sides === 2 ? (t === 0 ? 'right' : 'left') : 'right' });
+          if (stapleOn) {
+            if (edgeRight && c === A - 1) cell.spine = 'right';
+            else if (!edgeRight && c === 0) cell.spine = 'left';
+          }
+          cells.push(cell);
         }
-        plan.push({ W, H, side: sides === 2 ? (t === 0 ? 'front' : 'back') : 'single', cells, marks });
+        plan.push({ W, H, side: sides === 2 ? (t === 0 ? 'front' : 'back') : 'single', cells, marks: marks.concat(sm) });
       }
     }
     return plan;
@@ -466,7 +493,7 @@
         })();
         for (const s of seg) {
           page.drawLine({
-            start: { x: s[0], y: s[1] }, end: { x: s[2], y: s[3] }, thickness: 0.5, color: grey,
+            start: { x: s[0], y: s[1] }, end: { x: s[2], y: s[3] }, thickness: m.type === 'staple' ? 1.6 : 0.5, color: m.type === 'staple' ? rgb(0.6, 0.6, 0.6) : grey,
             dashArray: m.type === 'fold' ? [3, 3] : undefined,
           });
         }
@@ -496,6 +523,7 @@
       poster: plan.posterInfo || null,
       order: plan.slice(0, 200).map((s) => ({ side: s.side, pages: s.cells.map((c) => (c.item && c.item.num) || null) })),
       sheetSize: [plan[0].W, plan[0].H],
+      finished: plan[0].cells && plan[0].cells[0] ? [plan[0].cells[0].w - 2 * o.pad, plan[0].cells[0].h - 2 * o.pad] : null,
     };
     info.instructions = instructions(o, info);
     return { bytes, info };
@@ -508,6 +536,8 @@
     if (o.layout === 'booklet') {
       lines.push('Printer settings: double-sided, flip on the short edge. ' + common);
       lines.push('If your printer cannot do double-sided, download “Fronts only”, print it, put the stack back in the tray as your printer expects, then print “Backs only”. If the backs come out in the wrong order, use “Backs, reversed”.');
+      if (o.booklet.staples) lines.push(`Staple ${o.booklet.staples} times on the fold, at the grey guide marks printed on the inside of each sheet. Open the stapler flat, or use a long-reach one. Rest the booklet on a folded towel or a stack of scrap paper and staple from the outside.`);
+      else lines.push('No staple marks are printed. Fold only: bind with thread, glue or a rubber band along the fold.');
       lines.push(o.booklet.sig > 0
         ? `Fold each group of ${o.booklet.sig} sheet${o.booklet.sig > 1 ? 's' : ''} in half on its own, then stack the groups in order and bind them along the spine.`
         : 'Stack the sheets in order, fold the whole stack in half, and staple along the fold.');
@@ -528,6 +558,8 @@
     } else {
       const n = o.nup.across * o.nup.down;
       lines.push(`${n} page${n > 1 ? 's' : ''} per sheet. ${o.duplex ? `Printer settings: double-sided, flip on the ${o.flip} edge.` : 'Print single-sided.'} ${common}`);
+      if (o.nup.staple === 'corner') lines.push('Stack the sheets in order and staple once in the corner shown by the grey mark. Extra space is left on that edge so the staple does not cover text.');
+      else if (o.nup.staple === 'edge') lines.push('Stack the sheets in order and staple twice down the edge shown by the grey marks. Extra space is left on that edge so the staples do not cover text.');
       if (n > 1 && o.nup.order === 'stack' && !o.nup.repeat) lines.push('Cut the stack apart along the marks, then place the pile from each position on top of the one before it, left to right, top to bottom. The pages end up in order.');
       else if (n > 1) lines.push('Cut along the marks to separate the pages.');
     }
