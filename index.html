@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Print Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#controls">Skip to settings</a>
+<header class="top">
+  <div>
+    <h1>Print Desk</h1>
+    <p>Turn PDFs and images into folded booklets, zines, posters, banners and multi-up sheets. Files are processed in this browser and are never uploaded.</p>
+  </div>
+  <label class="unit">Units
+    <select id="unit"><option value="in">inches</option><option value="mm">millimetres</option></select>
+  </label>
+</header>
+
+<main class="layout">
+  <form class="controls" id="controls" onsubmit="return false">
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">1</span>Files</h2>
+      <div class="drop" id="drop">
+        <input type="file" id="fileInput" multiple accept="application/pdf,image/png,image/jpeg,image/webp,image/gif">
+        <p><strong>Drop PDFs or images here</strong>, or <label for="fileInput" class="link">choose files</label>.</p>
+        <p class="hint">Files print in the order listed. Word, Pages and Google Docs files need to be exported as PDF first.</p>
+      </div>
+      <ul class="files" id="fileList"></ul>
+      <div class="row">
+        <button type="button" id="addBlank" class="ghost">Add blank page</button>
+        <button type="button" id="addSample" class="ghost">Load 12 sample pages</button>
+        <button type="button" id="clearAll" class="ghost">Clear all</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">2</span>Layout</h2>
+      <div class="chips" role="radiogroup" aria-label="Layout">
+        <label class="chip"><input type="radio" name="layout" value="booklet" checked><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="17" height="24" fill="#fff"/><rect x="24" y="4" width="17" height="24" fill="#fff"/><path d="M22 2v28" stroke-dasharray="2 2"/><path d="M7 11h9M7 15h9M28 11h9M28 15h9" stroke-width="1"/></svg><span class="txt"><b>Folded booklet</b><i>Zines, chapbooks, programmes. Staple the fold.</i></span></span></label>
+        <label class="chip"><input type="radio" name="layout" value="zine"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="38" height="26" fill="#fff"/><path d="M12.5 3v26M22 3v26M31.5 3v26M3 16h38" stroke-dasharray="2 2" stroke-width="1"/><path d="M12.5 16h19" stroke="#FF5A1F" stroke-width="2.4"/></svg><span class="txt"><b>One-sheet zine</b><i>8 pages from one sheet, one cut</i></span></span></label>
+        <label class="chip"><input type="radio" name="layout" value="trifold"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="38" height="22" fill="#fff"/><path d="M15.7 5v22M28.3 5v22" stroke-dasharray="2 2"/><path d="M7 12h5M7 16h5M20 12h5M20 16h5M32 12h5M32 16h5" stroke-width="1"/></svg><span class="txt"><b>Tri-fold</b><i>Menus, leaflets, price lists</i></span></span></label>
+        <label class="chip"><input type="radio" name="layout" value="nup"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="12" fill="#fff"/><rect x="24" y="3" width="16" height="12" fill="#fff"/><rect x="4" y="18" width="16" height="12" fill="#fff"/><rect x="24" y="18" width="16" height="12" fill="#fff"/></svg><span class="txt"><b>Multi-up</b><i>Cards, postcards, labels, handouts</i></span></span></label>
+        <label class="chip"><input type="radio" name="layout" value="poster"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="12" height="12" fill="#fff"/><rect x="13" y="3" width="12" height="12" fill="#fff"/><rect x="23" y="3" width="12" height="12" fill="#fff"/><rect x="3" y="13" width="12" height="12" fill="#fff"/><rect x="13" y="13" width="12" height="12" fill="#fff"/><rect x="23" y="13" width="12" height="12" fill="#fff"/><path d="M9 20l5-6 5 6z" fill="#FF5A1F" stroke="none"/></svg><span class="txt"><b>Poster</b><i>Enlarge across tiled sheets</i></span></span></label>
+        <label class="chip"><input type="radio" name="layout" value="banner"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="11" width="40" height="10" fill="#fff"/><path d="M12 11v10M22 11v10M32 11v10" stroke-dasharray="2 2" stroke-width="1"/><path d="M6 16h28" stroke="#FF5A1F" stroke-width="2.4"/></svg><span class="txt"><b>Banner</b><i>Very wide or tall, cropped</i></span></span></label>
+      </div>
+      <div class="explain" id="explain" aria-live="polite"></div>
+
+      <div class="opts">
+        <div class="opt" data-for="booklet">
+          <label>Binding edge
+            <select id="binding"><option value="left">Left (English, most languages)</option><option value="right">Right (Arabic, Urdu, Hebrew, manga)</option></select>
+          </label>
+          <label>Sheets per bundle
+            <select id="sig">
+              <option value="0">All sheets in one booklet</option>
+              <option value="1">1 sheet (4 pages)</option><option value="2">2 sheets (8 pages)</option>
+              <option value="3">3 sheets (12 pages)</option><option value="4">4 sheets (16 pages)</option>
+              <option value="6">6 sheets (24 pages)</option><option value="8">8 sheets (32 pages)</option>
+            </select>
+          </label>
+          <label>Extra space at the spine <input class="dim" id="gutter" type="number" min="0" step="any" value="0"></label>
+          <label>Creep per sheet <input class="dim" id="creep" type="number" min="0" step="any" value="0">
+            <span class="hint">Shifts inner sheets toward the spine so a thick booklet trims evenly.</span></label>
+        </div>
+
+        <div class="opt" data-for="nup">
+          <label>Quick start
+            <select id="nupPreset"><option value="">Custom grid</option><option value="2x5r">Business cards, 10 per sheet (same card repeated)</option><option value="2x2">Postcards or flyers, 4 per sheet</option><option value="1x2r">Half-page handouts (same page twice)</option><option value="2x1">Two pages side by side</option><option value="3x3">Contact sheet, 9 per sheet</option></select>
+          </label>
+          <label>Across <input id="across" type="number" min="1" max="12" value="2"></label>
+          <label>Down <input id="down" type="number" min="1" max="12" value="2"></label>
+          <label>Gap between pages <input class="dim" id="gap" type="number" min="0" step="any" value="0"></label>
+          <label>Page order
+            <select id="order"><option value="rows">In reading order</option><option value="stack">Cut and stack (pages come out in order after cutting)</option></select>
+          </label>
+          <label class="check"><input type="checkbox" id="repeat"> Repeat the same page in every position (business cards, labels)</label>
+          <label class="check"><input type="checkbox" id="duplex" checked> Print on both sides of each sheet</label>
+          <label data-when="duplex">Printer flips on
+            <select id="flip"><option value="long">Long edge</option><option value="short">Short edge</option></select>
+          </label>
+        </div>
+
+        <div class="opt" data-for="poster banner">
+          <label data-for="poster">Poster size
+            <select id="posterPreset"><option value="">Custom size</option><option value="297x420mm">A3 (297 × 420 mm)</option><option value="420x594mm">A2 (420 × 594 mm)</option><option value="594x841mm">A1 (594 × 841 mm)</option><option value="841x1189mm">A0 (841 × 1189 mm)</option><option value="18x24in">18 × 24 in</option><option value="24x36in">24 × 36 in</option><option value="36x48in">36 × 48 in</option></select>
+          </label>
+          <label data-for="banner">Banner size
+            <select id="bannerPreset"><option value="">Custom size</option><option value="72x12in">Wide banner, 6 ft × 1 ft</option><option value="36x6in">Shelf or door strip, 3 ft × 6 in</option><option value="12x72in">Tall banner, 1 ft × 6 ft</option><option value="120x18in">Long banner, 10 ft × 18 in</option></select>
+          </label>
+          <label>Final width <input class="dim" id="posterW" type="number" min="1" step="any" value="24"></label>
+          <label>Final height <input class="dim" id="posterH" type="number" min="1" step="any" value="36"></label>
+          <label class="check" data-for="poster"><input type="checkbox" id="keepShape" checked> Keep the shape of the first page</label>
+          <label data-for="poster">Fit
+            <select id="posterMode"><option value="fit">Fit without stretching</option><option value="stretch">Stretch to fill</option><option value="crop">Fill and crop</option></select>
+          </label>
+          <label>Overlap between sheets <input class="dim" id="overlap" type="number" min="0" step="any" value="0.5">
+            <span class="hint">Printers cannot reach the paper edge, so tiles overlap and you trim the white strip.</span></label>
+          <p class="hint" data-for="banner">Banners fill the width and crop the rest. Put your text at the top of the page and run the longest line edge to edge. For a tall banner, put it down the left side.</p>
+        </div>
+
+        <div class="opt" data-for="trifold">
+          <p class="hint">Six panels per brochure, three on each side. Longer files make several brochures.</p>
+        </div>
+
+        <div class="opt" data-for="zine">
+          <p class="hint">Pages 1 to 8 on one sheet. Fold, make one cut in the middle, and fold again. Longer files make several zines.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">P</span>Your printer</h2>
+      <label>Printer profile
+        <select id="printer">
+          <option value="l3250">Epson EcoTank L3250 (one side only)</option>
+          <option value="auto">Printer with automatic double-sided</option>
+          <option value="single">Other one-sided printer</option>
+        </select>
+        <span class="hint" id="printerNote"></span>
+      </label>
+      <p class="hint">Browsers cannot list printers or switch sides for you. When you press Open to print, your browser’s print dialog appears and that is where you choose the printer. The profile tells Print Desk what your printer can do.</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">3</span>Paper</h2>
+      <div class="grid2">
+        <label>Paper size
+          <select id="paper">
+            <option value="letter">Letter 8.5 × 11 in</option><option value="legal">Legal 8.5 × 14 in</option>
+            <option value="tabloid">Tabloid 11 × 17 in</option><option value="halfletter">Half letter 5.5 × 8.5 in</option>
+            <option value="a4">A4</option><option value="a3">A3</option><option value="a5">A5</option><option value="a6">A6</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </label>
+        <label data-for="nup poster banner">Sheet orientation
+          <select id="orientation"><option value="auto">Automatic</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+        </label>
+        <label class="custom">Custom width <input class="dim" id="customW" type="number" min="1" step="any" value="8.5"></label>
+        <label class="custom">Custom height <input class="dim" id="customH" type="number" min="1" step="any" value="11"></label>
+        <label>Printer margin <input class="dim" id="margin" type="number" min="0" step="any" value="0.25">
+          <span class="hint">Most printers cannot print the last 0.25 in at each edge.</span></label>
+        <label data-for="booklet zine trifold nup">Space inside each page <input class="dim" id="pad" type="number" min="0" step="any" value="0"></label>
+        <label data-for="booklet zine trifold nup">Scaling
+          <select id="scaling"><option value="fit">Shrink to fit</option><option value="stretch">Stretch to fill</option><option value="none">Actual size (crop if larger)</option></select>
+        </label>
+        <label class="check"><input type="checkbox" id="reverse"> Print in reverse order</label>
+      </div>
+    </section>
+
+    <section class="card" data-for="booklet zine trifold nup poster banner" id="extras">
+      <h2><span class="n" aria-hidden="true">4</span>Marks and page extras</h2>
+      <div class="grid2">
+        <label>Fold and cut marks
+          <select id="marks"><option value="ticks">Short ticks at the paper edge</option><option value="lines">Full lines</option><option value="none">None</option></select>
+        </label>
+        <label class="check" data-for="booklet zine trifold nup"><input type="checkbox" id="border"> Thin border around each page</label>
+        <label class="check" data-for="booklet zine trifold nup"><input type="checkbox" id="pnOn"> Add page numbers</label>
+        <label data-for="booklet zine trifold nup">Number position
+          <select id="pnPos"><option value="bc">Bottom centre</option><option value="bo">Bottom outer corner</option><option value="br">Bottom right</option><option value="bl">Bottom left</option><option value="tc">Top centre</option><option value="tr">Top right</option></select>
+        </label>
+      </div>
+      <div class="stamp" data-for="booklet zine trifold nup">
+        <label>Header <input id="headerText" type="text" placeholder="&lt;job&gt; &lt;date&gt; &lt;#&gt;"></label>
+        <label>Footer <input id="footerText" type="text"></label>
+        <label>Watermark <input id="wmText" type="text" placeholder="DRAFT"></label>
+        <label>Size <input id="headerSize" type="number" min="4" max="48" value="10"></label>
+        <label>Align <select id="headerAlign"><option value="center">Centre</option><option value="left">Left</option><option value="right">Right</option></select></label>
+        <label>Opacity <input id="wmOpacity" type="number" min="3" max="100" value="15"></label>
+        <p class="hint">Tokens: <code>&lt;job&gt;</code> file name, <code>&lt;date&gt;</code>, <code>&lt;time&gt;</code>, <code>&lt;#&gt;</code> page number, <code>&lt;total&gt;</code> page count. Text scales with each page.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Saved settings</h2>
+      <div class="row">
+        <select id="presetList" aria-label="Saved settings"><option value="">Choose saved settings…</option></select>
+        <button type="button" id="presetLoad" class="ghost">Apply</button>
+        <button type="button" id="presetSave" class="ghost">Save current…</button>
+        <button type="button" id="presetDelete" class="ghost">Delete</button>
+      </div>
+    </section>
+  </form>
+
+  <aside class="preview">
+    <div class="stickyPane">
+      <div class="summary" id="summary">Add a file to begin.</div>
+      <div class="nav" id="nav" hidden>
+        <button type="button" id="prev" aria-label="Previous sheet">‹</button>
+        <span id="navLabel"></span>
+        <button type="button" id="next" aria-label="Next sheet">›</button>
+      </div>
+      <div class="stage" id="stage"></div>
+      <div class="export">
+        <div class="manual" id="manualRow" hidden>
+          <p class="hint" id="manualHint">This printer prints one side at a time. Print the fronts, put the stack back in the tray, then print the backs.</p>
+          <div class="row">
+            <button type="button" class="primary" data-pass="fronts">1. Print fronts</button>
+            <button type="button" class="ghost" data-pass="backs">2. Print backs</button>
+            <button type="button" class="ghost" data-pass="backs-rev">2. Backs, reversed</button>
+          </div>
+          <p class="hint">Not sure how your printer takes the paper back? Load the sample pages, choose Folded booklet, and run a 4-page test first. If the backs come out in the wrong order, use “Backs, reversed”.</p>
+        </div>
+        <label id="outputWrap" hidden>Which sheets
+          <select id="output">
+            <option value="all">Everything, for a double-sided printer</option>
+            <option value="fronts">Fronts only</option>
+            <option value="backs">Backs only</option>
+            <option value="backs-rev">Backs only, reversed</option>
+          </select>
+        </label>
+        <div class="row" id="stdRow">
+          <button type="button" id="download" class="primary" disabled>Download PDF</button>
+          <button type="button" id="openPrint" class="ghost" disabled>Open to print</button>
+        </div>
+      </div>
+      <div class="howto" id="howto" hidden>
+        <h3>How to print this</h3>
+        <ol id="howtoList"></ol>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/pdf.min.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
