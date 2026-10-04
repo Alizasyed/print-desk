@@ -137,18 +137,18 @@
   }
 
   function genPocket(p) {
-    const { w, h, g, hole, hd, wm, r } = p;
+    // The pocket is built around the card: card + room for the side flap, bottom flap and hang hole.
+    const { cw, ch, g, hole, hd, wm, r } = p;
     const topBlock = hd + hole / 2 + 3;
-    // The insert sits against the fold, between the side flap and the fold, above the bottom flap.
-    const iw = w - g - 2;
-    const ih = h - topBlock - g - 1;
-    const ix = g + 1;
+    const w = cw + g + 2;
+    const h = topBlock + ch + g + 1;
+    const ix = g + 1; // the card sits against the fold side
     const iy = topBlock;
-    // The window is centred on the pocket but kept inside the insert.
-    const wx = Math.max(wm, g + 4);
+    // Window centred on the pocket, kept at least wm inside the card on every side.
+    const wx = wm + g + 1;
     const wy = iy + wm;
     const ww = w - 2 * wx;
-    const wh = ih - 2 * wm;
+    const wh = ch - 2 * wm;
     const outline = [
       [0, 0], [2 * w, 0], [2 * w, 3], [2 * w + g, 3 + g * 0.4], [2 * w + g, h - 3 - g * 0.4], [2 * w, h - 3],
       [2 * w - 3, h], [2 * w - 3 - g * 0.4, h + g], [w + 3 + g * 0.4, h + g], [w + 3, h],
@@ -167,16 +167,17 @@
     ];
     if (p.insert === 'yes') {
       const ox = 2 * w + g + 14;
-      cut.push(closed(roundedRect(ox, 0, iw, ih, Math.min(r, 4))));
-      // dashed guide: where the window falls on the insert
+      cut.push(closed(roundedRect(ox, 0, cw, ch, Math.min(r, 4))));
       const gx = ox + (wx - ix);
       const gy = wy - iy;
       fold.push([gx, gy, gx + ww, gy], [gx + ww, gy, gx + ww, gy + wh], [gx + ww, gy + wh, gx, gy + wh], [gx, gy + wh, gx, gy]);
-      panels.push({ label: 'Insert card', x: ox, y: 0, w: iw, h: ih });
+      panels.push({ label: 'Card', x: ox, y: 0, w: cw, h: ch });
+    } else {
+      panels.push({ label: 'Your card (goes inside)', x: 0, y: 0, w: cw, h: ch, noDraw: true });
     }
     return {
       cut, fold, panels,
-      notes: `Cut on the solid lines, including the window and the holes. Fold the right-hand panel back behind the front on the dashed line, so the window faces out. Fold the side and bottom flaps forward and glue them to the inside of the front panel. The top stays open: the insert slides in from the top and shows through the window. Insert size: ${+iw.toFixed(1)} × ${+ih.toFixed(1)} mm. Punch the hang holes through both layers.`,
+      notes: `The pocket is drawn around a ${+cw.toFixed(1)} × ${+ch.toFixed(1)} mm card. Cut on the solid lines, including the window and the holes. Fold the right-hand panel back behind the front on the dashed line, so the window faces out. Fold the side and bottom flaps forward and glue them to the inside of the front panel. The top stays open: slide the card in from the top. The card shows through the window with at least ${+wm.toFixed(1)} mm around it. Punch the hang holes through both layers.`,
     };
   }
 
@@ -219,13 +220,13 @@
     },
     pocket: {
       name: 'Window pocket',
-      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. You slide your own card in from the top. The two panels sit side by side so it fits on an A4 sheet.',
+      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. Enter the size of the card that goes inside and the pocket is drawn around it. The two panels sit side by side so it fits on an A4 sheet.',
       fields: [
-        { id: 'w', label: 'Pocket width', def: 110 }, { id: 'h', label: 'Pocket height', def: 160 },
-        { id: 'wm', label: 'Window margin from the insert edge', def: 8, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
+        { id: 'cw', label: 'Card width', def: 105 }, { id: 'ch', label: 'Card height', def: 148 },
+        { id: 'wm', label: 'Window margin from the card edge', def: 8, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
         { id: 'hole', label: 'Hang hole diameter', def: 5, min: 0 }, { id: 'hd', label: 'Hole distance from top', def: 8, min: 2 },
         { id: 'g', label: 'Glue flap width', def: 8 },
-        { id: 'insert', label: 'Insert card', select: [['no', 'Pocket only'], ['yes', 'Also draw an insert card (needs a wider sheet)']], def: 'no' },
+        { id: 'insert', label: 'Card', select: [['no', 'Pocket only'], ['yes', 'Also draw the card (needs a wider sheet)']], def: 'no' },
       ],
       gen: genPocket,
     },
@@ -240,9 +241,9 @@
   };
 
   const PRESETS = [
-    { label: 'Badge pocket with window, 110 × 160 mm', type: 'pocket', v: { w: 110, h: 160, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
-    { label: 'Badge pocket for a 4 × 6 in insert', type: 'pocket', v: { w: 108, h: 164, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
-    { label: 'Small window pocket, A6', type: 'pocket', v: { w: 105, h: 148, wm: 7, r: 5, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Window pocket for an A6 card (105 × 148 mm)', type: 'pocket', v: { cw: 105, ch: 148, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Window pocket for a 4 × 6 in card', type: 'pocket', v: { cw: 101.6, ch: 152.4, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Window pocket for an A7 card (74 × 105 mm)', type: 'pocket', v: { cw: 74, ch: 105, wm: 6, r: 5, hole: 4, hd: 7, g: 8, insert: 'no' } },
     { label: 'Event card insert, 4 × 6 in', type: 'card', v: { w: 101.6, h: 152.4, r: 0, hole: 0 } },
     { label: 'Invitation, 5 × 7 in', type: 'card', v: { w: 127, h: 178, r: 0, hole: 0 } },
     { label: 'Menu or program card, 4 × 9 in', type: 'card', v: { w: 101.6, h: 228.6, r: 0, hole: 0 } },
@@ -279,7 +280,7 @@
       w: x1 - x0, h: y1 - y0,
       cut: g.cut.map((c) => ({ closed: c.closed, pts: c.pts.map(([x, y]) => sh(x, y)) })),
       fold: g.fold.map((f) => [...sh(f[0], f[1]), ...sh(f[2], f[3])]),
-      panels: g.panels.map((q) => ({ label: q.label, x: q.x - x0, y: q.y - y0, w: q.w, h: q.h, lx: q.lx === undefined ? undefined : q.lx - x0, ly: q.ly === undefined ? undefined : q.ly - y0 })),
+      panels: g.panels.map((q) => ({ label: q.label, x: q.x - x0, y: q.y - y0, w: q.w, h: q.h, noDraw: q.noDraw, lx: q.lx === undefined ? undefined : q.lx - x0, ly: q.ly === undefined ? undefined : q.ly - y0 })),
     };
   }
 
@@ -375,7 +376,7 @@
       }
       if (o.labels) {
         for (const q of tpl.panels) {
-          if (q.w < 14 || q.h < 9) continue;
+          if (q.noDraw || q.w < 14 || q.h < 9) continue;
           const t1 = q.label;
           const t2 = `${+q.w.toFixed(1)} × ${+q.h.toFixed(1)} mm`;
           const c = P(q.lx !== undefined ? q.lx : q.x + q.w / 2, q.ly !== undefined ? q.ly : q.y + q.h / 2);
@@ -450,7 +451,7 @@
     for (const c of tpl.cut) s += `<path d="M${c.pts.map((p) => f(p[0]) + ' ' + f(p[1])).join(' L')}${c.closed ? ' Z' : ''}" stroke="${cutC}" stroke-width="${opt.sw || 0.3}"/>\n`;
     if (opt.labels) {
       for (const q of tpl.panels) {
-        if (q.w < 12 || q.h < 8) continue;
+        if (q.noDraw || q.w < 12 || q.h < 8) continue;
         const fs = Math.max(2.2, Math.min(4, q.w / 9));
         const cx = q.lx !== undefined ? q.lx : q.x + q.w / 2;
         const cy = q.ly !== undefined ? q.ly : q.y + q.h / 2;
