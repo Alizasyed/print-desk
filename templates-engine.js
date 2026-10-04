@@ -241,6 +241,7 @@
   };
 
   const PRESETS = [
+    { label: 'Window pocket, about 10 × 15 cm (card 88 × 125 mm)', type: 'pocket', v: { cw: 88, ch: 125.5, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Window pocket for an A6 card (105 × 148 mm)', type: 'pocket', v: { cw: 105, ch: 148, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Window pocket for a 4 × 6 in card', type: 'pocket', v: { cw: 101.6, ch: 152.4, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Window pocket for an A7 card (74 × 105 mm)', type: 'pocket', v: { cw: 74, ch: 105, wm: 6, r: 5, hole: 4, hd: 7, g: 8, insert: 'no' } },
