@@ -340,6 +340,8 @@
       c.style.width = w + 'px';
       c.style.height = (vp.height / dpr) + 'px';
       await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      const mode = $('#proof').value;
+      if (mode && !$('#proofCmp').checked) PrintProof.apply(c, mode);
       const fig = document.createElement('figure');
       fig.append(c);
       if (!poster) {
@@ -363,6 +365,18 @@
     schedule();
   });
   $$('#manualRow [data-pass]').forEach((b) => b.addEventListener('click', () => printPDF(b.dataset.pass)));
+
+  function proofUI() {
+    const on = !!$('#proof').value;
+    $('#proofCmpWrap').hidden = !on;
+    $('#proofNote').hidden = !on;
+  }
+  $('#proof').addEventListener('change', () => {
+    proofUI();
+    try { localStorage.setItem('printdesk.proof', $('#proof').value); } catch (e) { /* ignore */ }
+    if (state.built) renderUnit(state.token);
+  });
+  $('#proofCmp').addEventListener('change', () => { if (state.built) renderUnit(state.token); });
 
   const go = (d) => { const t = state.idx + d; if (t >= 0 && t < state.units.length) { state.idx = t; renderUnit(state.token); } };
   $('#prev').addEventListener('click', () => go(-1));
@@ -455,6 +469,8 @@
 
   try { const p = localStorage.getItem('printdesk.printer'); if (p) $('#printer').value = p; } catch (e) { /* ignore */ }
   if ($('#printer').value === 'l3250' && !localStorage.getItem('printdesk.printer')) setDim('margin', 3 * PT.mm);
+  try { const pv = localStorage.getItem('printdesk.proof'); if (pv && PrintProof.PROFILES[pv]) $('#proof').value = pv; } catch (e) { /* ignore */ }
+  proofUI();
   showExplain();
   fillPresets();
   renderFiles();

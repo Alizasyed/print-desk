@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1791123138">
+<link rel="stylesheet" href="style.css?v=1791123342">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -201,6 +201,18 @@
   <aside class="preview">
     <div class="stickyPane">
       <div class="summary" id="summary">Add a file to begin.</div>
+      <div class="proof">
+        <label>Colour preview
+          <select id="proof">
+            <option value="">Screen colours (RGB, as designed)</option>
+            <option value="inkjet">Home inkjet on plain paper</option>
+            <option value="uncoated">Uncoated paper, commercial CMYK</option>
+            <option value="coated">Coated paper, commercial CMYK</option>
+          </select>
+        </label>
+        <label class="check" id="proofCmpWrap" hidden><input type="checkbox" id="proofCmp"> Show original colours for comparison</label>
+        <p class="hint" id="proofNote" hidden>Approximate. It mimics how four-colour ink dulls bright screen colours, such as neon orange or vivid blue. It is not your printer’s real profile. Print a small test of the colours that matter.</p>
+      </div>
       <div class="nav" id="nav" hidden>
         <button type="button" id="prev" aria-label="Previous sheet">‹</button>
         <span id="navLabel"></span>
@@ -241,8 +253,9 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="imageutil.js?v=1791123138"></script>
-<script src="engine.js?v=1791123138"></script>
-<script src="app.js?v=1791123138"></script>
+<script src="imageutil.js?v=1791123342"></script>
+<script src="softproof.js?v=1791123342"></script>
+<script src="engine.js?v=1791123342"></script>
+<script src="app.js?v=1791123342"></script>
 </body>
 </html>

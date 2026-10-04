@@ -162,3 +162,6 @@ table.panels { width: 100%; border-collapse: collapse; font-size: 14px; margin-b
 table.panels th, table.panels td { text-align: left; padding: 6px 8px; border-bottom: 1.5px solid var(--rule); }
 table.panels th { font-weight: 700; font-size: 12.5px; }
 .artname { font-size: 13px; margin: 0 0 12px; }
+
+.proof { margin-bottom: 12px; padding: 12px 14px 2px; background: var(--paper-2); border: 2px solid var(--ink); }
+.proof select { max-width: 380px; }
