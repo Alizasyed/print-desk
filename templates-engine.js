@@ -136,6 +136,41 @@
     };
   }
 
+  function genPocket(p) {
+    const { w, h, g, hole, hd, wm, r } = p;
+    const topBlock = hd + hole / 2 + 3;
+    const iw = w - 4;
+    const ih = h - topBlock - 2;
+    const wx = 2 + wm;
+    const wy = topBlock + wm;
+    const ww = iw - 2 * wm;
+    const wh = ih - 2 * wm;
+    const outline = [
+      [0, 0], [w, 0], [w, h + 3], [w + g, h + 3 + g * 0.4], [w + g, 2 * h - g * 0.4], [w, 2 * h],
+      [0, 2 * h], [-g, 2 * h - g * 0.4], [-g, h + 3 + g * 0.4], [0, h + 3],
+    ];
+    const cut = [closed(outline), closed(roundedRect(wx, wy, ww, wh, r))];
+    if (hole > 0) {
+      cut.push(closed(circle(w / 2, hd, hole / 2)));
+      cut.push(closed(circle(w / 2, 2 * h - hd, hole / 2)));
+    }
+    const fold = [[0, h, w, h], [0, h + 3, 0, 2 * h], [w, h + 3, w, 2 * h]];
+    const panels = [
+      { label: 'Window opening', x: wx, y: wy, w: ww, h: wh },
+      { label: 'Front panel', x: 0, y: 0, w, h, lx: w / 2, ly: Math.max(topBlock / 2 + 1, 4) },
+      { label: 'Back panel', x: 0, y: h, w, h },
+    ];
+    if (p.insert === 'yes') {
+      const ox = w + g + 14;
+      cut.push(closed(roundedRect(ox, 0, iw, ih, Math.min(r, 4))));
+      panels.push({ label: 'Insert card', x: ox, y: 0, w: iw, h: ih });
+    }
+    return {
+      cut, fold, panels,
+      notes: `Fold on the dashed line at the bottom so the window panel lies over the back. Glue the two side flaps inside the front panel. The insert slides in from the top and shows through the window. It is ${+iw.toFixed(1)} × ${+ih.toFixed(1)} mm so it sits below the hang hole. Punch or cut the hole through both layers.`,
+    };
+  }
+
   const TYPES = {
     card: {
       name: 'Flat card or insert',
@@ -173,6 +208,18 @@
       ],
       gen: genTuck,
     },
+    pocket: {
+      name: 'Window pocket with insert',
+      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. The insert card slides in behind the window.',
+      fields: [
+        { id: 'w', label: 'Pocket width', def: 110 }, { id: 'h', label: 'Pocket height', def: 160 },
+        { id: 'wm', label: 'Window margin (insert shows inside this)', def: 8, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
+        { id: 'hole', label: 'Hang hole diameter', def: 5, min: 0 }, { id: 'hd', label: 'Hole distance from top', def: 8, min: 2 },
+        { id: 'g', label: 'Side glue flap width', def: 10 },
+        { id: 'insert', label: 'Matching insert card', select: [['yes', 'Include the insert card'], ['no', 'Pocket only']], def: 'yes' },
+      ],
+      gen: genPocket,
+    },
     sleeve: {
       name: 'Sleeve or belly band',
       desc: 'A wrap that slides over something. Works for card sets, boxes, zines and bundles.',
@@ -184,6 +231,9 @@
   };
 
   const PRESETS = [
+    { label: 'Badge pocket with window, 110 × 160 mm', type: 'pocket', v: { w: 110, h: 160, wm: 8, r: 6, hole: 5, hd: 8, g: 10, insert: 'yes' } },
+    { label: 'Badge pocket for a 4 × 6 in insert', type: 'pocket', v: { w: 108, h: 164, wm: 8, r: 6, hole: 5, hd: 8, g: 10, insert: 'yes' } },
+    { label: 'Small window pocket, A6', type: 'pocket', v: { w: 105, h: 148, wm: 7, r: 5, hole: 5, hd: 8, g: 10, insert: 'yes' } },
     { label: 'Event card insert, 4 × 6 in', type: 'card', v: { w: 101.6, h: 152.4, r: 0, hole: 0 } },
     { label: 'Invitation, 5 × 7 in', type: 'card', v: { w: 127, h: 178, r: 0, hole: 0 } },
     { label: 'Menu or program card, 4 × 9 in', type: 'card', v: { w: 101.6, h: 228.6, r: 0, hole: 0 } },
@@ -220,7 +270,7 @@
       w: x1 - x0, h: y1 - y0,
       cut: g.cut.map((c) => ({ closed: c.closed, pts: c.pts.map(([x, y]) => sh(x, y)) })),
       fold: g.fold.map((f) => [...sh(f[0], f[1]), ...sh(f[2], f[3])]),
-      panels: g.panels.map((q) => ({ label: q.label, x: q.x - x0, y: q.y - y0, w: q.w, h: q.h })),
+      panels: g.panels.map((q) => ({ label: q.label, x: q.x - x0, y: q.y - y0, w: q.w, h: q.h, lx: q.lx === undefined ? undefined : q.lx - x0, ly: q.ly === undefined ? undefined : q.ly - y0 })),
     };
   }
 
@@ -319,7 +369,7 @@
           if (q.w < 14 || q.h < 9) continue;
           const t1 = q.label;
           const t2 = `${+q.w.toFixed(1)} × ${+q.h.toFixed(1)} mm`;
-          const c = P(q.x + q.w / 2, q.y + q.h / 2);
+          const c = P(q.lx !== undefined ? q.lx : q.x + q.w / 2, q.ly !== undefined ? q.ly : q.y + q.h / 2);
           page.drawText(t1, { x: c.x - font.widthOfTextAtSize(t1, 7) / 2, y: c.y + 2, size: 7, font, color: grey });
           page.drawText(t2, { x: c.x - font.widthOfTextAtSize(t2, 6) / 2, y: c.y - 6, size: 6, font, color: grey });
         }
@@ -393,8 +443,10 @@
       for (const q of tpl.panels) {
         if (q.w < 12 || q.h < 8) continue;
         const fs = Math.max(2.2, Math.min(4, q.w / 9));
-        s += `<text x="${f(q.x + q.w / 2)}" y="${f(q.y + q.h / 2)}" font-size="${f(fs)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${q.label}</text>\n`;
-        s += `<text x="${f(q.x + q.w / 2)}" y="${f(q.y + q.h / 2 + fs * 1.3)}" font-size="${f(fs * 0.8)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${f(q.w)} × ${f(q.h)} mm</text>\n`;
+        const cx = q.lx !== undefined ? q.lx : q.x + q.w / 2;
+        const cy = q.ly !== undefined ? q.ly : q.y + q.h / 2;
+        s += `<text x="${f(cx)}" y="${f(cy)}" font-size="${f(fs)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${q.label}</text>\n`;
+        s += `<text x="${f(cx)}" y="${f(cy + fs * 1.3)}" font-size="${f(fs * 0.8)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${f(q.w)} × ${f(q.h)} mm</text>\n`;
       }
     }
     return s + '</svg>';
