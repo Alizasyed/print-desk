@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Templates · Print Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#controls">Skip to settings</a>
+<header class="top">
+  <div>
+    <h1 data-text="Templates">Templates</h1>
+    <nav class="sitenav" aria-label="Tools"><a href="./">Print Desk</a><a href="templates.html" aria-current="page">Templates</a></nav>
+    <p>Cut and fold templates for cards, envelopes, boxes and sleeves. Pick a size and a sheet of paper, and it prints at true size with a ruler to check the scale.</p>
+  </div>
+  <label class="unit">Units
+    <select id="unit"><option value="mm">millimetres</option><option value="in">inches</option></select>
+  </label>
+</header>
+
+<main class="layout">
+  <form class="controls" id="controls" onsubmit="return false">
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">1</span>Template</h2>
+      <label>Start from a common size
+        <select id="preset"></select>
+      </label>
+      <label>Type
+        <select id="type"></select>
+        <span class="hint" id="typeDesc"></span>
+      </label>
+      <div class="grid2" id="fields"></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">2</span>Paper</h2>
+      <div class="grid2">
+        <label>Paper size
+          <select id="paper">
+            <option value="letter">Letter 8.5 × 11 in</option><option value="legal">Legal 8.5 × 14 in</option>
+            <option value="tabloid">Tabloid 11 × 17 in</option><option value="a4">A4</option><option value="a3">A3</option>
+            <option value="a5">A5</option><option value="a6">A6</option>
+          </select>
+        </label>
+        <label>Sheet orientation
+          <select id="orientation"><option value="auto">Automatic (most copies)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+        </label>
+        <label>Printer margin <input class="dim" id="margin" type="number" min="0" step="any" value="6.35">
+          <span class="hint">Space your printer cannot print at the edges.</span></label>
+        <label>Gap between copies <input class="dim" id="gap" type="number" min="0" step="any" value="3"></label>
+        <label>Copies
+          <select id="copies"><option value="fill">Fill the sheet</option><option value="one">One copy</option></select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">3</span>Artwork and lines</h2>
+      <div class="drop" id="drop">
+        <input type="file" id="artInput" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif">
+        <p><strong>Optional artwork.</strong> <label for="artInput" class="link">Choose an image or PDF</label>.</p>
+        <p class="hint">It fills the whole template, plus the bleed, behind the lines. Design it at the size shown in “Panels”.</p>
+      </div>
+      <p class="artname" id="artName" hidden></p>
+      <div class="row" id="artRow" hidden><button type="button" class="ghost" id="artClear">Remove artwork</button></div>
+      <div class="grid2">
+        <label id="bleedWrap" hidden>Bleed <input class="dim" id="bleed" type="number" min="0" step="any" value="3">
+          <span class="hint">Artwork runs this far past the cut line, so trimming leaves no white edge.</span></label>
+        <label class="check"><input type="checkbox" id="lines" checked> Print cut lines (solid) and fold lines (dashed)</label>
+        <label class="check"><input type="checkbox" id="labels" checked> Label each panel with its size</label>
+        <label class="check"><input type="checkbox" id="ruler" checked> Print a ruler to check the scale</label>
+      </div>
+    </section>
+  </form>
+
+  <aside class="preview">
+    <div class="stickyPane">
+      <div class="summary" id="summary"></div>
+      <div class="tpl-stage">
+        <figure><div id="shape"></div><figcaption id="shapeCap"></figcaption></figure>
+        <figure class="paper"><div id="paperMap"></div><figcaption id="paperCap"></figcaption></figure>
+      </div>
+      <div class="export">
+        <div class="row">
+          <button type="button" id="printNow" class="primary">Print</button>
+          <button type="button" id="download" class="ghost">Download PDF</button>
+          <button type="button" id="svg" class="ghost">Download SVG</button>
+        </div>
+        <p class="hint">Print at 100% or “Actual size”. The SVG is in millimetres, red for cut and blue dashed for fold, ready to open in Canva, Illustrator, Figma or Inkscape and design on.</p>
+      </div>
+      <div class="howto">
+        <h3>Panels</h3>
+        <table class="panels" id="panels"><thead><tr><th scope="col">Panel</th><th scope="col">Size</th></tr></thead><tbody></tbody></table>
+        <p id="notes"></p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="templates-engine.js"></script>
+<script src="templates.js"></script>
+</body>
+</html>

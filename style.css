@@ -34,7 +34,7 @@ code { background: var(--rule); padding: 0 4px; font-size: 12px; }
 /* header */
 .top { display: flex; justify-content: space-between; gap: 24px; align-items: flex-end; padding: 32px var(--gutter) 20px; max-width: 1360px; margin: 0 auto; border-bottom: 2px solid var(--ink); }
 .top h1 { font-size: clamp(44px, 8vw, 92px); letter-spacing: -.05em; line-height: .82; position: relative; display: inline-block; }
-.top h1::after { content: "Print Desk"; position: absolute; inset: 0; color: var(--orange); transform: translate(var(--mis-x), var(--mis-y)); mix-blend-mode: multiply; z-index: -1; pointer-events: none; }
+.top h1::after { content: attr(data-text); position: absolute; inset: 0; color: var(--orange); transform: translate(var(--mis-x), var(--mis-y)); mix-blend-mode: multiply; z-index: -1; pointer-events: none; }
 .top h1 { z-index: 0; isolation: isolate; }
 .top p { max-width: 52ch; margin: 14px 0 0; color: var(--ink-soft); }
 .unit { font-size: 13px; font-weight: 600; display: flex; gap: 8px; align-items: center; white-space: nowrap; }
@@ -148,3 +148,17 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .explain p { margin: 0 0 6px; max-width: 60ch; }
 .explain p:last-child { margin: 0; }
 .manual { margin-bottom: 4px; }
+
+.sitenav { display: flex; gap: 8px; margin-top: 16px; }
+.sitenav a { font-weight: 700; font-size: 14px; color: var(--ink); text-decoration: none; padding: 8px 14px; border: 2px solid var(--ink); background: var(--paper-2); min-height: 40px; display: inline-flex; align-items: center; }
+.sitenav a[aria-current=page] { background: var(--ink); color: var(--paper); }
+.sitenav a:hover:not([aria-current=page]) { box-shadow: var(--hard-sm); transform: translate(-1px, -1px); }
+.tpl-stage { background-color: #D9D1C4; background-image: radial-gradient(circle, rgba(27, 26, 24, .28) 1px, transparent 1.6px); background-size: 8px 8px; border: 2px solid var(--ink); box-shadow: var(--hard); padding: 20px; display: grid; gap: 18px; justify-items: center; }
+.tpl-stage figure { margin: 0; text-align: center; width: 100%; }
+.tpl-stage svg { max-width: 100%; height: auto; max-height: 420px; background: #fff; border: 1.5px solid var(--ink); box-shadow: 4px 4px 0 var(--orange); }
+.tpl-stage figcaption { font-size: 12.5px; font-weight: 700; margin-top: 8px; }
+.tpl-stage .paper svg { box-shadow: none; max-height: 260px; }
+table.panels { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 10px; }
+table.panels th, table.panels td { text-align: left; padding: 6px 8px; border-bottom: 1.5px solid var(--rule); }
+table.panels th { font-weight: 700; font-size: 12.5px; }
+.artname { font-size: 13px; margin: 0 0 12px; }
