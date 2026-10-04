@@ -326,9 +326,10 @@
     const fh = tpl.h * MM + 2 * bb;
     const gap = o.gap * MM;
     const m = o.margin;
+    const mb = o.marginBottom === undefined ? m : o.marginBottom;
     const ruler = o.ruler ? 18 : 0;
     const orients = o.orientation === 'portrait' ? [[pw, ph]] : o.orientation === 'landscape' ? [[ph, pw]] : [[pw, ph], [ph, pw]];
-    const area = (W, H) => ({ x: m, y: m + ruler, w: W - 2 * m, h: H - 2 * m - ruler });
+    const area = (W, H) => ({ x: m, y: mb + ruler, w: W - 2 * m, h: H - m - mb - ruler });
     let best = null;
     for (const [W, H] of orients) {
       const a = area(W, H);
@@ -427,7 +428,7 @@
       if (!o.ruler) return;
       const len = o.rulerMM * MM;
       const x = o.margin;
-      const y = o.margin + 8;
+      const y = (o.marginBottom === undefined ? o.margin : o.marginBottom) + 8;
       page.drawLine({ start: { x, y }, end: { x: x + len, y }, thickness: 0.8, color: black });
       [0, len].forEach((d) => page.drawLine({ start: { x: x + d, y: y - 3 }, end: { x: x + d, y: y + 3 }, thickness: 0.8, color: black }));
       const label = `Check: this line is ${o.rulerLabel} long. If it is not, print at 100% or "Actual size".`;

@@ -119,6 +119,7 @@
       paper: PAPERS[$('#paper').value] || PAPERS.a4,
       orientation: $('#orientation').value,
       margin: dimMM('margin') * MM,
+      marginBottom: dimMM('marginB') * MM,
       gap: dimMM('gap'),
       copies: $('#copies').value,
       bleed: dimMM('bleed'),
@@ -238,6 +239,8 @@
       setTimeout(fallback, 6000);
     } catch (e) { $('#summary').textContent = e.message || 'Could not prepare the print job.'; }
   });
+
+  $('#scaleTest').addEventListener('click', () => PrintTest.open(PDFLib, PAPERS[$('#paper').value] || PAPERS.a4));
 
   /* ---------- start ---------- */
   document.querySelectorAll('.dim').forEach((el) => { el.dataset.mm = fromDisp(el.value) || 0; });

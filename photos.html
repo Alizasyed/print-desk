@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1791130275">
+<link rel="stylesheet" href="style.css?v=1791130792">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -66,7 +66,9 @@
           <select id="orientation"><option value="auto">Automatic (most per sheet)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
         </label>
         <label>Margin <input class="dim" id="margin" type="number" min="0" step="any" value="3">
-          <span class="hint">3 mm suits most home printers. Use 0 only if you print borderless.</span></label>
+          <span class="hint">Left, right and top. 3 mm suits most home printers.</span></label>
+        <label>Bottom margin <input class="dim" id="marginB" type="number" min="0" step="any" value="15">
+          <span class="hint">Many inkjets, including Epson L-series, cannot print the bottom 14 mm or so. If content sits in that strip, the printer or dialog shrinks the whole page.</span></label>
         <label>Gap between photos <input class="dim" id="gap" type="number" min="0" step="any" value="2"></label>
         <label class="check"><input type="checkbox" id="border" checked> Thin line around each photo to cut along</label>
         <label class="check"><input type="checkbox" id="ruler" checked> Print a ruler to check the scale</label>
@@ -87,15 +89,26 @@
         <div class="row">
           <button type="button" id="printNow" class="primary" disabled>Print</button>
           <button type="button" id="download" class="ghost" disabled>Download PDF</button>
+          <button type="button" id="scaleTest" class="ghost">Print a scale test</button>
         </div>
         <p class="hint">Print at 100% or “Actual size”, not “Fit to page”. On the Epson L3250, choose A4 and your photo paper type, and keep the scale at 100%.</p>
+      </div>
+      <div class="howto">
+        <h3>Before you print</h3>
+        <ol>
+          <li>Paper size in the print dialog must match the paper here, for example A4.</li>
+          <li>Scale must be 100% or “Actual size”. Never “Fit to page”.</li>
+          <li>In the Epson dialog, turn off “Reduce/Enlarge” and “Fit to page”.</li>
+          <li>Not sure it printed right? Press <b>Print a scale test</b>, then measure the 100 mm square.</li>
+        </ol>
       </div>
     </div>
   </aside>
 </main>
 
 <script src="vendor/pdf-lib.min.js"></script>
-<script src="imageutil.js?v=1791130275"></script>
-<script src="photos.js?v=1791130275"></script>
+<script src="imageutil.js?v=1791130792"></script>
+<script src="scaletest.js?v=1791130792"></script>
+<script src="photos.js?v=1791130792"></script>
 </body>
 </html>

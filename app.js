@@ -142,7 +142,7 @@
       paper: $('#paper').value,
       customPaper: [dim('customW') || 612, dim('customH') || 792],
       orientation: $('#orientation').value,
-      margins: { top: m, left: m, bottom: m, right: m },
+      margins: { top: m, left: m, bottom: $('#printer').value === 'l3250' ? Math.max(m, 15 * PT.mm) : m, right: m },
       pad: dim('pad'), gutter: layoutValue() === 'nup' ? dim('nupGutter') : dim('gutter'), creep: dim('creep'),
       scaling: $('#scaling').value,
       reverse: $('#reverse').checked,

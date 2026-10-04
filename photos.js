@@ -133,6 +133,7 @@
       slotOrient: $('#slotOrient').value,
       slot: [dimMM('slotW') * MM, dimMM('slotH') * MM],
       margin: dimMM('margin') * MM,
+      marginB: dimMM('marginB') * MM,
       gap: dimMM('gap') * MM,
       fit: $('#fit').value,
       rotate: $('#rotate').checked,
@@ -152,7 +153,7 @@
     const ruler = o.ruler ? 18 : 0;
     let best = null;
     for (const [W, H] of sheets) {
-      const a = { x: o.margin, y: o.margin + ruler, w: W - 2 * o.margin, h: H - 2 * o.margin - ruler };
+      const a = { x: o.margin, y: o.marginB + ruler, w: W - 2 * o.margin, h: H - o.margin - o.marginB - ruler };
       for (const [sw, sh] of slots) {
         const nx = Math.floor((a.w + o.gap + 1e-6) / (sw + o.gap));
         const ny = Math.floor((a.h + o.gap + 1e-6) / (sh + o.gap));
@@ -283,7 +284,7 @@
       if (o.ruler) {
         const len = o.rulerMM * MM;
         const x = o.margin;
-        const y = o.margin + 8;
+        const y = o.marginB + 8;
         page.drawLine({ start: { x, y }, end: { x: x + len, y }, thickness: 0.8, color: rgb(0, 0, 0) });
         [0, len].forEach((d) => page.drawLine({ start: { x: x + d, y: y - 3 }, end: { x: x + d, y: y + 3 }, thickness: 0.8, color: rgb(0, 0, 0) }));
         page.drawText(`Check: this line is ${o.rulerLabel} long. If it is not, print at 100% or "Actual size".`, { x: x + len + 8, y: y - 2.5, size: 7, font, color: grey });
@@ -322,6 +323,8 @@
       setTimeout(fallback, 6000);
     } catch (e) { $('#summary').textContent = e.message || 'Could not prepare the print job.'; }
   });
+
+  $('#scaleTest').addEventListener('click', () => PrintTest.open(PDFLib, PAPERS[$('#paper').value] || PAPERS.a4));
 
   window.__photos = { state, layout, opts, buildPDF };
   restore();
