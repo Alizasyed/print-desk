@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photos · Print Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1791130275">
+</head>
+<body>
+<a class="skip" href="#controls">Skip to settings</a>
+<header class="top">
+  <div>
+    <h1 data-text="Photos">Photos</h1>
+    <nav class="sitenav" aria-label="Tools"><a href="./">Print Desk</a><a href="templates.html">Templates</a><a href="photos.html" aria-current="page">Photos</a></nav>
+    <p>Add as many photos as you like and print them together on A4 at their real size. 4 × 6 in, 10 × 15 cm, passport and more, packed to fit.</p>
+  </div>
+  <label class="unit">Units
+    <select id="unit"><option value="mm">millimetres</option><option value="in">inches</option></select>
+  </label>
+</header>
+
+<main class="layout">
+  <form class="controls" id="controls" onsubmit="return false">
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">1</span>Photos</h2>
+      <div class="drop" id="drop">
+        <input type="file" id="fileInput" multiple accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg">
+        <p><strong>Drop photos here</strong>, or <label for="fileInput" class="link">choose photos</label>.</p>
+        <p class="hint">JPG, PNG, WebP, GIF and SVG. iPhone HEIC photos need to be exported as JPG first. Photos are never uploaded.</p>
+      </div>
+      <ul class="files" id="fileList"></ul>
+      <div class="row">
+        <button type="button" id="clearAll" class="ghost">Clear all</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">2</span>Print size</h2>
+      <label>Size of each photo
+        <select id="preset"></select>
+      </label>
+      <div class="grid2">
+        <label>Width <input class="dim" id="slotW" type="number" min="1" step="any" value="100"></label>
+        <label>Height <input class="dim" id="slotH" type="number" min="1" step="any" value="150"></label>
+        <label>Photo direction
+          <select id="slotOrient"><option value="auto">Automatic (most per sheet)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+        </label>
+        <label>Fit
+          <select id="fit"><option value="fill">Fill the size (crops the edges)</option><option value="fit">Whole photo (white bars)</option></select>
+        </label>
+        <label class="check"><input type="checkbox" id="rotate" checked> Turn photos sideways to match the size</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">3</span>Paper</h2>
+      <div class="grid2">
+        <label>Paper size
+          <select id="paper"><option value="a4">A4</option><option value="letter">Letter 8.5 × 11 in</option><option value="a5">A5</option></select>
+        </label>
+        <label>Sheet orientation
+          <select id="orientation"><option value="auto">Automatic (most per sheet)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+        </label>
+        <label>Margin <input class="dim" id="margin" type="number" min="0" step="any" value="3">
+          <span class="hint">3 mm suits most home printers. Use 0 only if you print borderless.</span></label>
+        <label>Gap between photos <input class="dim" id="gap" type="number" min="0" step="any" value="2"></label>
+        <label class="check"><input type="checkbox" id="border" checked> Thin line around each photo to cut along</label>
+        <label class="check"><input type="checkbox" id="ruler" checked> Print a ruler to check the scale</label>
+      </div>
+    </section>
+  </form>
+
+  <aside class="preview">
+    <div class="stickyPane">
+      <div class="summary" id="summary">Add photos to begin.</div>
+      <div class="nav" id="nav" hidden>
+        <button type="button" id="prev" aria-label="Previous sheet">‹</button>
+        <span id="navLabel"></span>
+        <button type="button" id="next" aria-label="Next sheet">›</button>
+      </div>
+      <div class="tpl-stage"><figure><div id="sheet"></div><figcaption id="sheetCap"></figcaption></figure></div>
+      <div class="export">
+        <div class="row">
+          <button type="button" id="printNow" class="primary" disabled>Print</button>
+          <button type="button" id="download" class="ghost" disabled>Download PDF</button>
+        </div>
+        <p class="hint">Print at 100% or “Actual size”, not “Fit to page”. On the Epson L3250, choose A4 and your photo paper type, and keep the scale at 100%.</p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="imageutil.js?v=1791130275"></script>
+<script src="photos.js?v=1791130275"></script>
+</body>
+</html>
