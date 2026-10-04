@@ -136,67 +136,73 @@
     };
   }
 
-  function genPocket(p) {
-    // The pocket is built around the card: card + room for the side flap, bottom flap and hang hole.
-    const { cw, ch, g, hole, hd, wm, r } = p;
-    const topBlock = hd + hole / 2 + 3;
-    const w = cw + g + 2;
-    const h = topBlock + ch + g + 1;
-    const ix = g + 1; // the card sits against the fold side
+  // Pocket sized by its outer size and window. The card that fits inside is worked out from that.
+  function pocketDims(p) {
+    const topBlock = p.hd + p.hole / 2 + 3;
+    const cw = p.pw - p.g - 2;
+    const ch = p.ph - topBlock - p.g - 1;
+    const ix = p.g + 1; // the card sits against the fold side, between the glue flap and the fold
     const iy = topBlock;
-    // Window centred on the pocket, kept at least wm inside the card on every side.
-    const wx = wm + g + 1;
-    const wy = iy + wm;
-    const ww = w - 2 * wx;
-    const wh = ch - 2 * wm;
+    const wx = (p.pw - p.ww) / 2;
+    const wy = p.wtop > 0 ? p.wtop : iy + (ch - p.wh) / 2;
+    const m = { l: wx - ix, r: ix + cw - (wx + p.ww), t: wy - iy, b: iy + ch - (wy + p.wh) };
+    const warn = [];
+    if (cw <= 0 || ch <= 0) warn.push('The pocket is too small for its flaps and hole.');
+    else {
+      if (Math.min(m.l, m.r) < 2) warn.push('The window is too wide: the card would not stay behind it at the sides. Make the window narrower, the pocket wider, or the glue flap narrower.');
+      if (Math.min(m.t, m.b) < 2) warn.push('The window is too tall: the card would not stay behind it at the top or bottom. Make the window shorter or the pocket taller.');
+    }
+    return { topBlock, cw, ch, ix, iy, wx, wy, m, warn };
+  }
+
+  function genPocket(p) {
+    const { pw: w, ph: h, g, hole, hd, ww, wh, r } = p;
+    const d = pocketDims(p);
     const outline = [
       [0, 0], [2 * w, 0], [2 * w, 3], [2 * w + g, 3 + g * 0.4], [2 * w + g, h - 3 - g * 0.4], [2 * w, h - 3],
       [2 * w - 3, h], [2 * w - 3 - g * 0.4, h + g], [w + 3 + g * 0.4, h + g], [w + 3, h],
       [0, h],
     ];
-    const cut = [closed(outline), closed(roundedRect(wx, wy, ww, wh, r))];
+    const cut = [closed(outline), closed(roundedRect(d.wx, d.wy, ww, wh, r))];
     if (hole > 0) {
       cut.push(closed(circle(w / 2, hd, hole / 2)));
       cut.push(closed(circle(1.5 * w, hd, hole / 2)));
     }
     const fold = [[w, 0, w, h], [2 * w, 3, 2 * w, h - 3], [w + 3, h, 2 * w - 3, h]];
     const panels = [
-      { label: 'Window opening', x: wx, y: wy, w: ww, h: wh },
-      { label: 'Front panel', x: 0, y: 0, w, h, lx: w / 2, ly: topBlock + 3 },
+      { label: 'Window opening', x: d.wx, y: d.wy, w: ww, h: wh },
+      { label: 'Front panel', x: 0, y: 0, w, h, lx: w / 2, ly: Math.max((hd + hole / 2 + d.wy) / 2 + 1, 4) },
       { label: 'Back panel', x: w, y: 0, w, h },
     ];
     if (p.insert === 'yes') {
       const ox = 2 * w + g + 14;
-      cut.push(closed(roundedRect(ox, 0, cw, ch, Math.min(r, 4))));
-      const gx = ox + (wx - ix);
-      const gy = wy - iy;
-      fold.push([gx, gy, gx + ww, gy], [gx + ww, gy, gx + ww, gy + wh], [gx + ww, gy + wh, gx, gy + wh], [gx, gy + wh, gx, gy]);
-      panels.push({ label: 'Card', x: ox, y: 0, w: cw, h: ch });
+      cut.push(closed(roundedRect(ox, 0, d.cw, d.ch, 3)));
+      const gx = ox + (d.wx - d.ix);
+      const gy = d.wy - d.iy;
+      const guide = roundedRect(gx, gy, ww, wh, r);
+      guide.forEach((pt, i) => { const q = guide[(i + 1) % guide.length]; fold.push([pt[0], pt[1], q[0], q[1]]); });
+      panels.push({ label: 'Card', x: ox, y: 0, w: d.cw, h: d.ch });
     } else {
-      panels.push({ label: 'Your card (goes inside)', x: 0, y: 0, w: cw, h: ch, noDraw: true });
+      panels.push({ label: 'Card that fits inside', x: 0, y: 0, w: d.cw, h: d.ch, noDraw: true });
     }
     return {
       cut, fold, panels,
-      notes: `The pocket is drawn around a ${+cw.toFixed(1)} × ${+ch.toFixed(1)} mm card. Cut on the solid lines, including the window and the holes. Fold the right-hand panel back behind the front on the dashed line, so the window faces out. Fold the side and bottom flaps forward and glue them to the inside of the front panel. The top stays open: slide the card in from the top. The card shows through the window with at least ${+wm.toFixed(1)} mm around it. Punch the hang holes through both layers.`,
+      notes: `${d.warn.length ? 'Check: ' + d.warn.join(' ') + ' ' : ''}Pocket ${+w.toFixed(1)} × ${+h.toFixed(1)} mm with a ${+ww.toFixed(1)} × ${+wh.toFixed(1)} mm window. The card that fits inside is ${+d.cw.toFixed(1)} × ${+d.ch.toFixed(1)} mm. Cut on the solid lines, including the window and the holes. Fold the right-hand panel back behind the front on the dashed line, so the window faces out. Fold the side and bottom flaps forward and glue them to the inside of the front panel. The top stays open: slide the card in from the top. Punch the hang holes through both layers.`,
     };
   }
 
   function genPocketCard(p) {
-    const { cw, ch, wm, g, wr, cr } = p;
-    const wx = wm; // same geometry as the pocket: card sits against the fold, window centred on the pocket
-    const ww = Math.max(cw - g - 2 * wm, 1);
-    const wy = wm;
-    const wh = Math.max(ch - 2 * wm, 1);
-    const cut = [closed(roundedRect(0, 0, cw, ch, cr))];
-    const guide = roundedRect(wx, wy, ww, wh, wr);
+    const d = pocketDims(p);
+    const cut = [closed(roundedRect(0, 0, d.cw, d.ch, p.cr))];
+    const guide = roundedRect(d.wx - d.ix, d.wy - d.iy, p.ww, p.wh, p.r);
     const fold = guide.map((pt, i) => { const q = guide[(i + 1) % guide.length]; return [pt[0], pt[1], q[0], q[1]]; });
     return {
       cut, fold,
       panels: [
-        { label: 'Card', x: 0, y: 0, w: cw, h: ch, lx: cw / 2, ly: Math.max(wm * 0.55, 3) },
-        { label: 'Window shows here', x: wx, y: wy, w: ww, h: wh },
+        { label: 'Card', x: 0, y: 0, w: d.cw, h: d.ch, lx: d.cw / 2, ly: Math.max(Math.min((d.wy - d.iy) * 0.55, 6), 3) },
+        { label: 'Window shows here', x: d.wx - d.ix, y: d.wy - d.iy, w: p.ww, h: p.wh },
       ],
-      notes: `Cut the card on the solid line. The dashed shape is where the pocket window falls, so keep text and faces inside it. Artwork outside it is hidden behind the pocket, but you can run it to the card edge. When the card is in the pocket, slide it in until it sits against the fold side. It is made for the window pocket with the same card size, window margin and glue flap.`,
+      notes: `${d.warn.length ? 'Check: ' + d.warn.join(' ') + ' ' : ''}Cut the card on the solid line. The dashed shape is where the pocket window falls, so keep text and faces inside it. Artwork outside it is hidden behind the pocket, but you can run it to the card edge. Use the same pocket size, window, hole and glue flap values as the pocket.`,
     };
   }
 
@@ -239,23 +245,27 @@
     },
     pocket: {
       name: 'Window pocket',
-      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. Enter the size of the card that goes inside and the pocket is drawn around it. The two panels sit side by side so it fits on an A4 sheet.',
+      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. Set the pocket size and the window size. The card that fits inside is worked out for you. The two panels sit side by side so it fits on an A4 sheet.',
       fields: [
-        { id: 'cw', label: 'Card width', def: 105 }, { id: 'ch', label: 'Card height', def: 148 },
-        { id: 'wm', label: 'Window margin from the card edge', def: 8, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
+        { id: 'pw', label: 'Pocket width', def: 100 }, { id: 'ph', label: 'Pocket height', def: 150 },
+        { id: 'ww', label: 'Window width', def: 78 }, { id: 'wh', label: 'Window height', def: 110 },
+        { id: 'wtop', label: 'Window distance from top (0 = centred)', def: 0, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
         { id: 'hole', label: 'Hang hole diameter', def: 5, min: 0 }, { id: 'hd', label: 'Hole distance from top', def: 8, min: 2 },
-        { id: 'g', label: 'Glue flap width', def: 8 },
+        { id: 'g', label: 'Glue flap width', def: 6 },
         { id: 'insert', label: 'Card', select: [['no', 'Pocket only'], ['yes', 'Also draw the card (needs a wider sheet)']], def: 'no' },
       ],
       gen: genPocket,
     },
     pocketcard: {
       name: 'Insert card for a window pocket',
-      desc: 'The card that goes inside the window pocket. The dashed outline shows where the window sits, so you can place your design. Use the same card size, window margin and glue flap as the pocket.',
+      desc: 'The card that goes inside the window pocket. The dashed outline shows where the window sits, so you can place your design. Enter the same pocket and window values as the pocket.',
       fields: [
-        { id: 'cw', label: 'Card width', def: 88 }, { id: 'ch', label: 'Card height', def: 125.5 },
-        { id: 'wm', label: 'Window margin from the card edge', def: 8, min: 0 }, { id: 'wr', label: 'Window corner radius', def: 6, min: 0 },
-        { id: 'g', label: 'Glue flap width (same as pocket)', def: 8 }, { id: 'cr', label: 'Card corner radius', def: 3, min: 0 },
+        { id: 'pw', label: 'Pocket width', def: 100 }, { id: 'ph', label: 'Pocket height', def: 150 },
+        { id: 'ww', label: 'Window width', def: 78 }, { id: 'wh', label: 'Window height', def: 110 },
+        { id: 'wtop', label: 'Window distance from top (0 = centred)', def: 0, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
+        { id: 'hole', label: 'Hang hole diameter', def: 5, min: 0 }, { id: 'hd', label: 'Hole distance from top', def: 8, min: 2 },
+        { id: 'g', label: 'Glue flap width', def: 6 },
+        { id: 'cr', label: 'Card corner radius', def: 3, min: 0 },
       ],
       gen: genPocketCard,
     },
@@ -270,13 +280,13 @@
   };
 
   const PRESETS = [
-    { label: 'Insert card for the 10 × 15 cm pocket (88 × 125.5 mm)', type: 'pocketcard', v: { cw: 88, ch: 125.5, wm: 8, wr: 6, g: 8, cr: 3 } },
-    { label: 'Insert card for the A6 pocket (105 × 148 mm)', type: 'pocketcard', v: { cw: 105, ch: 148, wm: 8, wr: 6, g: 8, cr: 3 } },
-    { label: 'Insert card for the 4 × 6 in pocket', type: 'pocketcard', v: { cw: 101.6, ch: 152.4, wm: 8, wr: 6, g: 8, cr: 3 } },
-    { label: 'Window pocket, about 10 × 15 cm (card 88 × 125 mm)', type: 'pocket', v: { cw: 88, ch: 125.5, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
-    { label: 'Window pocket for an A6 card (105 × 148 mm)', type: 'pocket', v: { cw: 105, ch: 148, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
-    { label: 'Window pocket for a 4 × 6 in card', type: 'pocket', v: { cw: 101.6, ch: 152.4, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
-    { label: 'Window pocket for an A7 card (74 × 105 mm)', type: 'pocket', v: { cw: 74, ch: 105, wm: 6, r: 5, hole: 4, hd: 7, g: 8, insert: 'no' } },
+    { label: 'Window pocket 10 × 15 cm, window 78 × 110 mm', type: 'pocket', v: { pw: 100, ph: 150, ww: 78, wh: 110, wtop: 0, r: 6, hole: 5, hd: 8, g: 6, insert: 'no' } },
+    { label: 'Insert card for the 10 × 15 cm pocket (78 × 110 mm window)', type: 'pocketcard', v: { pw: 100, ph: 150, ww: 78, wh: 110, wtop: 0, r: 6, hole: 5, hd: 8, g: 6, cr: 3 } },
+    { label: 'Window pocket for an A6 card (105 × 148 mm)', type: 'pocket', v: { pw: 115, ph: 170.5, ww: 81, wh: 132, wtop: 0, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Insert card for the A6 pocket', type: 'pocketcard', v: { pw: 115, ph: 170.5, ww: 81, wh: 132, wtop: 0, r: 6, hole: 5, hd: 8, g: 8, cr: 3 } },
+    { label: 'Window pocket for a 4 × 6 in card', type: 'pocket', v: { pw: 111.6, ph: 174.9, ww: 78, wh: 136, wtop: 0, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Insert card for the 4 × 6 in pocket', type: 'pocketcard', v: { pw: 111.6, ph: 174.9, ww: 78, wh: 136, wtop: 0, r: 6, hole: 5, hd: 8, g: 8, cr: 3 } },
+    { label: 'Window pocket 10 × 15 cm, narrower window 64 × 109.5 mm', type: 'pocket', v: { pw: 98, ph: 148, ww: 64, wh: 109.5, wtop: 0, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Event card insert, 4 × 6 in', type: 'card', v: { w: 101.6, h: 152.4, r: 0, hole: 0 } },
     { label: 'Invitation, 5 × 7 in', type: 'card', v: { w: 127, h: 178, r: 0, hole: 0 } },
     { label: 'Menu or program card, 4 × 9 in', type: 'card', v: { w: 101.6, h: 228.6, r: 0, hole: 0 } },
