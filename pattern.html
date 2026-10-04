@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pattern · Print Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1791134789">
+</head>
+<body>
+<a class="skip" href="#controls">Skip to settings</a>
+<header class="top">
+  <div>
+    <h1 data-text="Pattern">Pattern</h1>
+    <nav class="sitenav" aria-label="Tools"><a href="./">Print Desk</a><a href="templates.html">Templates</a><a href="photos.html">Photos</a><a href="pattern.html" aria-current="page">Pattern</a></nav>
+    <p>Wrapping paper from one small logo. Choose how it repeats, preview the whole sheet, then print or export it.</p>
+  </div>
+  <label class="unit">Units
+    <select id="unit"><option value="mm">millimetres</option><option value="in">inches</option></select>
+  </label>
+</header>
+
+<main class="layout">
+  <form class="controls" id="controls" onsubmit="return false">
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">1</span>Logo</h2>
+      <div class="drop" id="drop">
+        <input type="file" id="logoInput" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg">
+        <p><strong>Choose your logo</strong>, or <label for="logoInput" class="link">browse for a file</label>.</p>
+        <p class="hint">A transparent PNG or an SVG works best. Use a large version, at least 1000 px wide, so it prints sharply.</p>
+      </div>
+      <div class="row"><button type="button" class="ghost" id="sample">Use a sample logo</button></div>
+      <p class="artname" id="logoName" hidden></p>
+      <div class="grid2">
+        <label class="check"><input type="checkbox" id="noWhite"> Make a white background transparent</label>
+        <label class="check"><input type="checkbox" id="recolor"> Recolour the logo to one colour</label>
+      </div>
+      <div class="swatchRow" id="logoColorRow" hidden>
+        <span class="swlabel">Logo colour</span>
+        <div class="swatches" id="logoSwatches" role="group" aria-label="Logo colour"></div>
+        <input type="color" id="logoColor" value="#1B1A18" aria-label="Custom logo colour">
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">2</span>Pattern</h2>
+      <label>How it repeats
+        <select id="pattern">
+          <option value="brick">Brick (every other row shifted)</option>
+          <option value="grid">Grid (straight rows and columns)</option>
+          <option value="halfdrop">Half-drop (every other column shifted down)</option>
+          <option value="diamond">Diamond (tightly staggered)</option>
+          <option value="scatter">Scatter (loose and random)</option>
+        </select>
+        <span class="hint" id="patternDesc"></span>
+      </label>
+      <div class="grid2">
+        <label>Logo width <input class="dim" id="logoW" type="number" min="1" step="any" value="25"></label>
+        <label>Opacity (%) <input id="opacity" type="number" min="5" max="100" value="100"></label>
+        <label>Space across <input class="dim" id="gapX" type="number" min="-50" step="any" value="15"></label>
+        <label>Space down <input class="dim" id="gapY" type="number" min="-50" step="any" value="15"></label>
+        <label id="offsetWrap">Shift between rows (%) <input id="offset" type="number" min="0" max="100" value="50"></label>
+        <label>Turn each logo
+          <select id="rotMode">
+            <option value="fixed">The same angle</option>
+            <option value="alt">Alternate upside down</option>
+            <option value="quarter">Random quarter turns</option>
+            <option value="tilt">Random small tilt</option>
+            <option value="random">Random any angle</option>
+          </select>
+        </label>
+        <label>Angle (degrees) <input id="angle" type="number" min="-180" max="180" value="0"></label>
+        <label id="jitterWrap">Looseness (%) <input id="jitter" type="number" min="0" max="100" value="40"></label>
+        <label>Size variation (%) <input id="scaleVar" type="number" min="0" max="80" value="0"></label>
+      </div>
+      <div class="row"><button type="button" class="ghost" id="shuffle">Shuffle the random parts</button></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">3</span>Colour</h2>
+      <div class="swatchRow">
+        <span class="swlabel">Paper colour</span>
+        <div class="swatches" id="bgSwatches" role="group" aria-label="Paper colour"></div>
+        <input type="color" id="bgColor" value="#EFEBE2" aria-label="Custom paper colour">
+      </div>
+      <p class="hint">The preview shows screen colours. Printed colours will look a little duller.</p>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">4</span>Sheet</h2>
+      <div class="grid2">
+        <label>Sheet size
+          <select id="sheet">
+            <option value="a4">A4 (210 × 297 mm)</option>
+            <option value="a5">A5 (148 × 210 mm)</option>
+            <option value="letter">Letter (8.5 × 11 in)</option>
+            <option value="a3">A3 (297 × 420 mm), 2 A4 pages</option>
+            <option value="wrap50">Gift wrap, 50 × 70 cm</option>
+            <option value="wrap70">Gift wrap, 70 × 100 cm</option>
+            <option value="custom">Custom size</option>
+          </select>
+        </label>
+        <label>Print on
+          <select id="paper"><option value="a4">A4</option><option value="letter">Letter</option></select>
+        </label>
+        <label class="custom">Width <input class="dim" id="sheetW" type="number" min="10" step="any" value="210"></label>
+        <label class="custom">Height <input class="dim" id="sheetH" type="number" min="10" step="any" value="297"></label>
+      </div>
+      <p class="hint">Sheets bigger than your paper print in pieces with a 10 mm overlap to tape together. Your printer leaves a thin white edge on every page unless you print borderless, so for an A4 sheet turn on borderless in the Epson dialog.</p>
+    </section>
+  </form>
+
+  <aside class="preview">
+    <div class="stickyPane">
+      <div class="summary" id="summary">Choose a logo or use the sample.</div>
+      <div class="row" style="margin-top:0">
+        <label class="check" style="margin:0"><input type="checkbox" id="actual"> Show at actual size</label>
+      </div>
+      <div class="patStage" id="patStage"><canvas id="cv" aria-label="Preview of the wrapping paper pattern"></canvas></div>
+      <p class="hint" id="cap"></p>
+      <div class="export">
+        <div class="row">
+          <button type="button" id="printNow" class="primary" disabled>Print</button>
+          <button type="button" id="download" class="ghost" disabled>Download PDF</button>
+          <button type="button" id="png" class="ghost" disabled>Download PNG</button>
+        </div>
+        <p class="hint">Print at 100% or “Actual size”, not “Fit to page”, so the logos print at the size you set.</p>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="imageutil.js?v=1791134789"></script>
+<script src="pattern.js?v=1791134789"></script>
+</body>
+</html>
