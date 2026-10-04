@@ -181,6 +181,25 @@
     };
   }
 
+  function genPocketCard(p) {
+    const { cw, ch, wm, g, wr, cr } = p;
+    const wx = wm; // same geometry as the pocket: card sits against the fold, window centred on the pocket
+    const ww = Math.max(cw - g - 2 * wm, 1);
+    const wy = wm;
+    const wh = Math.max(ch - 2 * wm, 1);
+    const cut = [closed(roundedRect(0, 0, cw, ch, cr))];
+    const guide = roundedRect(wx, wy, ww, wh, wr);
+    const fold = guide.map((pt, i) => { const q = guide[(i + 1) % guide.length]; return [pt[0], pt[1], q[0], q[1]]; });
+    return {
+      cut, fold,
+      panels: [
+        { label: 'Card', x: 0, y: 0, w: cw, h: ch, lx: cw / 2, ly: Math.max(wm * 0.55, 3) },
+        { label: 'Window shows here', x: wx, y: wy, w: ww, h: wh },
+      ],
+      notes: `Cut the card on the solid line. The dashed shape is where the pocket window falls, so keep text and faces inside it. Artwork outside it is hidden behind the pocket, but you can run it to the card edge. When the card is in the pocket, slide it in until it sits against the fold side. It is made for the window pocket with the same card size, window margin and glue flap.`,
+    };
+  }
+
   const TYPES = {
     card: {
       name: 'Flat card or insert',
@@ -230,6 +249,16 @@
       ],
       gen: genPocket,
     },
+    pocketcard: {
+      name: 'Insert card for a window pocket',
+      desc: 'The card that goes inside the window pocket. The dashed outline shows where the window sits, so you can place your design. Use the same card size, window margin and glue flap as the pocket.',
+      fields: [
+        { id: 'cw', label: 'Card width', def: 88 }, { id: 'ch', label: 'Card height', def: 125.5 },
+        { id: 'wm', label: 'Window margin from the card edge', def: 8, min: 0 }, { id: 'wr', label: 'Window corner radius', def: 6, min: 0 },
+        { id: 'g', label: 'Glue flap width (same as pocket)', def: 8 }, { id: 'cr', label: 'Card corner radius', def: 3, min: 0 },
+      ],
+      gen: genPocketCard,
+    },
     sleeve: {
       name: 'Sleeve or belly band',
       desc: 'A wrap that slides over something. Works for card sets, boxes, zines and bundles.',
@@ -241,6 +270,9 @@
   };
 
   const PRESETS = [
+    { label: 'Insert card for the 10 × 15 cm pocket (88 × 125.5 mm)', type: 'pocketcard', v: { cw: 88, ch: 125.5, wm: 8, wr: 6, g: 8, cr: 3 } },
+    { label: 'Insert card for the A6 pocket (105 × 148 mm)', type: 'pocketcard', v: { cw: 105, ch: 148, wm: 8, wr: 6, g: 8, cr: 3 } },
+    { label: 'Insert card for the 4 × 6 in pocket', type: 'pocketcard', v: { cw: 101.6, ch: 152.4, wm: 8, wr: 6, g: 8, cr: 3 } },
     { label: 'Window pocket, about 10 × 15 cm (card 88 × 125 mm)', type: 'pocket', v: { cw: 88, ch: 125.5, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Window pocket for an A6 card (105 × 148 mm)', type: 'pocket', v: { cw: 105, ch: 148, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Window pocket for a 4 × 6 in card', type: 'pocket', v: { cw: 101.6, ch: 152.4, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
@@ -378,11 +410,15 @@
       if (o.labels) {
         for (const q of tpl.panels) {
           if (q.noDraw || q.w < 14 || q.h < 9) continue;
-          const t1 = q.label;
-          const t2 = `${+q.w.toFixed(1)} × ${+q.h.toFixed(1)} mm`;
+          const sz = `${+q.w.toFixed(1)} × ${+q.h.toFixed(1)} mm`;
           const c = P(q.lx !== undefined ? q.lx : q.x + q.w / 2, q.ly !== undefined ? q.ly : q.y + q.h / 2);
-          page.drawText(t1, { x: c.x - font.widthOfTextAtSize(t1, 7) / 2, y: c.y + 2, size: 7, font, color: grey });
-          page.drawText(t2, { x: c.x - font.widthOfTextAtSize(t2, 6) / 2, y: c.y - 6, size: 6, font, color: grey });
+          if (q.lx !== undefined || q.ly !== undefined) {
+            const t = `${q.label}  ${sz}`;
+            page.drawText(t, { x: c.x - font.widthOfTextAtSize(t, 6.5) / 2, y: c.y - 2, size: 6.5, font, color: grey });
+          } else {
+            page.drawText(q.label, { x: c.x - font.widthOfTextAtSize(q.label, 7) / 2, y: c.y + 2, size: 7, font, color: grey });
+            page.drawText(sz, { x: c.x - font.widthOfTextAtSize(sz, 6) / 2, y: c.y - 6, size: 6, font, color: grey });
+          }
         }
       }
     }
@@ -456,8 +492,12 @@
         const fs = Math.max(2.2, Math.min(4, q.w / 9));
         const cx = q.lx !== undefined ? q.lx : q.x + q.w / 2;
         const cy = q.ly !== undefined ? q.ly : q.y + q.h / 2;
-        s += `<text x="${f(cx)}" y="${f(cy)}" font-size="${f(fs)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${q.label}</text>\n`;
-        s += `<text x="${f(cx)}" y="${f(cy + fs * 1.3)}" font-size="${f(fs * 0.8)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${f(q.w)} × ${f(q.h)} mm</text>\n`;
+        if (q.lx !== undefined || q.ly !== undefined) {
+          s += `<text x="${f(cx)}" y="${f(cy)}" font-size="${f(fs * 0.8)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${q.label}  ${f(q.w)} × ${f(q.h)} mm</text>\n`;
+        } else {
+          s += `<text x="${f(cx)}" y="${f(cy)}" font-size="${f(fs)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${q.label}</text>\n`;
+          s += `<text x="${f(cx)}" y="${f(cy + fs * 1.3)}" font-size="${f(fs * 0.8)}" text-anchor="middle" fill="${opt.text || '#4A4742'}" stroke="none" font-family="Instrument Sans, Arial, sans-serif">${f(q.w)} × ${f(q.h)} mm</text>\n`;
+        }
       }
     }
     return s + '</svg>';
