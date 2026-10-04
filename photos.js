@@ -136,6 +136,7 @@
       marginB: dimMM('marginB') * MM,
       gap: dimMM('gap') * MM,
       fit: $('#fit').value,
+      mix: $('#mix').checked,
       rotate: $('#rotate').checked,
       border: $('#border').checked,
       ruler: $('#ruler').checked,
@@ -144,34 +145,75 @@
     };
   }
 
+  // Rows ("shelves") of slots stacked down the sheet. Each row can be portrait or landscape,
+  // so a sheet can hold two portrait photos side by side and one landscape photo underneath.
+  function shelfPack(aw, ah, gap, dims) {
+    const memo = new Map();
+    const best = (rem) => {
+      const key = Math.round(rem * 100);
+      if (memo.has(key)) return memo.get(key);
+      let res = { n: 0, shelves: [] };
+      for (const [w, h] of dims) {
+        if (h > rem + 1e-6 || w > aw + 1e-6) continue;
+        const cnt = Math.floor((aw + gap + 1e-6) / (w + gap));
+        const next = best(rem - h - gap);
+        if (cnt + next.n > res.n) res = { n: cnt + next.n, shelves: [{ w, h, cnt }].concat(next.shelves) };
+      }
+      memo.set(key, res);
+      return res;
+    };
+    return best(ah);
+  }
+
   function layout(o) {
     const [pw, ph] = [Math.min(...o.paper), Math.max(...o.paper)];
     const sheets = o.orientation === 'portrait' ? [[pw, ph]] : o.orientation === 'landscape' ? [[ph, pw]] : [[pw, ph], [ph, pw]];
     const lo = Math.min(...o.slot);
     const hi = Math.max(...o.slot);
-    const slots = o.slotOrient === 'portrait' ? [[lo, hi]] : o.slotOrient === 'landscape' ? [[hi, lo]] : [[lo, hi], [hi, lo]];
+    let dims = o.slotOrient === 'portrait' ? [[lo, hi]] : o.slotOrient === 'landscape' ? [[hi, lo]] : [[lo, hi], [hi, lo]];
+    if (lo === hi) dims = [[lo, hi]];
+    const sets = o.mix && dims.length > 1 ? [dims] : dims.map((d) => [d]);
     const ruler = o.ruler ? 18 : 0;
     let best = null;
     for (const [W, H] of sheets) {
       const a = { x: o.margin, y: o.marginB + ruler, w: W - 2 * o.margin, h: H - o.margin - o.marginB - ruler };
-      for (const [sw, sh] of slots) {
-        const nx = Math.floor((a.w + o.gap + 1e-6) / (sw + o.gap));
-        const ny = Math.floor((a.h + o.gap + 1e-6) / (sh + o.gap));
-        if (nx < 1 || ny < 1) continue;
-        if (!best || nx * ny > best.nx * best.ny) best = { W, H, a, sw, sh, nx, ny };
+      for (const set of sets) {
+        const r = shelfPack(a.w, a.h, o.gap, set);
+        if (!r.n) continue;
+        const mixed = new Set(r.shelves.map((s) => s.w + 'x' + s.h)).size > 1;
+        if (!best || r.n > best.n || (r.n === best.n && best.mixed && !mixed)) best = { W, H, a, n: r.n, shelves: r.shelves, mixed };
       }
     }
     if (!best) return null;
-    const gw = best.nx * best.sw + (best.nx - 1) * o.gap;
-    const gh = best.ny * best.sh + (best.ny - 1) * o.gap;
-    const x0 = best.a.x + (best.a.w - gw) / 2;
-    const top = best.a.y + (best.a.h + gh) / 2;
-    best.positions = [];
-    for (let j = 0; j < best.ny; j++) for (let i = 0; i < best.nx; i++) {
-      best.positions.push({ x: x0 + i * (best.sw + o.gap), y: top - (j + 1) * best.sh - j * o.gap });
+    const total = best.shelves.reduce((s, r) => s + r.h, 0) + o.gap * (best.shelves.length - 1);
+    let yTop = best.a.y + (best.a.h + total) / 2;
+    const slots = [];
+    for (const sh of best.shelves) {
+      const y = yTop - sh.h;
+      const rowW = sh.cnt * sh.w + (sh.cnt - 1) * o.gap;
+      const x0 = best.a.x + (best.a.w - rowW) / 2;
+      for (let i = 0; i < sh.cnt; i++) slots.push({ x: x0 + i * (sh.w + o.gap), y, w: sh.w, h: sh.h });
+      yTop -= sh.h + o.gap;
     }
-    best.per = best.nx * best.ny;
-    return best;
+    return { W: best.W, H: best.H, a: best.a, slots, per: slots.length, mixed: best.mixed };
+  }
+
+  // Put each photo in a slot that matches its direction where possible.
+  function assign(list, lay, sheetIdx) {
+    const chunk = list.slice(sheetIdx * lay.per, (sheetIdx + 1) * lay.per);
+    const out = new Array(lay.slots.length).fill(null);
+    const used = new Array(lay.slots.length).fill(false);
+    const rest = [];
+    for (const p of chunk) {
+      const land = p.w > p.h;
+      const k = lay.slots.findIndex((s, i) => !used[i] && (s.w > s.h) === land);
+      if (k < 0) rest.push(p); else { used[k] = true; out[k] = p; }
+    }
+    for (const p of rest) {
+      const k = lay.slots.findIndex((s, i) => !used[i]);
+      if (k >= 0) { used[k] = true; out[k] = p; }
+    }
+    return out;
   }
 
   function instances() {
@@ -199,19 +241,20 @@
     const { W, H } = lay;
     let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${f(W)} ${f(H)}" role="img" aria-label="Sheet ${sheetIdx + 1} layout"><rect width="${f(W)}" height="${f(H)}" fill="#fff"/>`;
     s += `<rect x="${f(lay.a.x)}" y="${f(H - lay.a.y - lay.a.h)}" width="${f(lay.a.w)}" height="${f(lay.a.h)}" fill="none" stroke="#bbb" stroke-dasharray="4 4"/>`;
-    lay.positions.forEach((pos, k) => {
-      const ph = list[sheetIdx * lay.per + k];
-      const x = pos.x;
-      const y = H - pos.y - lay.sh;
-      if (!ph) { s += `<rect x="${f(x)}" y="${f(y)}" width="${f(lay.sw)}" height="${f(lay.sh)}" fill="#f4f1ea" stroke="#ccc" stroke-dasharray="3 3"/>`; return; }
-      const pl = place(ph, x, y, lay.sw, lay.sh, o);
+    const photos = assign(list, lay, sheetIdx);
+    lay.slots.forEach((slot, k) => {
+      const ph = photos[k];
+      const x = slot.x;
+      const y = H - slot.y - slot.h;
+      if (!ph) { s += `<rect x="${f(x)}" y="${f(y)}" width="${f(slot.w)}" height="${f(slot.h)}" fill="#f4f1ea" stroke="#ccc" stroke-dasharray="3 3"/>`; return; }
+      const pl = place(ph, x, y, slot.w, slot.h, o);
       const slice = o.fit === 'fill' ? 'slice' : 'meet';
       if (pl.turn) {
-        s += `<g transform="translate(${f(x + lay.sw / 2)} ${f(y + lay.sh / 2)}) rotate(90)"><svg x="${f(-lay.sh / 2)}" y="${f(-lay.sw / 2)}" width="${f(lay.sh)}" height="${f(lay.sw)}"><image href="${ph.thumb}" width="100%" height="100%" preserveAspectRatio="xMidYMid ${slice}"/></svg></g>`;
+        s += `<g transform="translate(${f(x + slot.w / 2)} ${f(y + slot.h / 2)}) rotate(90)"><svg x="${f(-slot.h / 2)}" y="${f(-slot.w / 2)}" width="${f(slot.h)}" height="${f(slot.w)}"><image href="${ph.thumb}" width="100%" height="100%" preserveAspectRatio="xMidYMid ${slice}"/></svg></g>`;
       } else {
-        s += `<svg x="${f(x)}" y="${f(y)}" width="${f(lay.sw)}" height="${f(lay.sh)}"><image href="${ph.thumb}" width="100%" height="100%" preserveAspectRatio="xMidYMid ${slice}"/></svg>`;
+        s += `<svg x="${f(x)}" y="${f(y)}" width="${f(slot.w)}" height="${f(slot.h)}"><image href="${ph.thumb}" width="100%" height="100%" preserveAspectRatio="xMidYMid ${slice}"/></svg>`;
       }
-      if (o.border) s += `<rect x="${f(x)}" y="${f(y)}" width="${f(lay.sw)}" height="${f(lay.sh)}" fill="none" stroke="#666" stroke-width="0.6"/>`;
+      if (o.border) s += `<rect x="${f(x)}" y="${f(y)}" width="${f(slot.w)}" height="${f(slot.h)}" fill="none" stroke="#666" stroke-width="0.6"/>`;
     });
     return s + '</svg>';
   }
@@ -238,8 +281,8 @@
     $('#prev').disabled = state.sheet === 0;
     $('#next').disabled = state.sheet >= sheets - 1;
     $('#summary').textContent = has
-      ? `${list.length} photo${list.length > 1 ? 's' : ''} on ${sheets} sheet${sheets > 1 ? 's' : ''} of ${paperName}, ${lay.per} per sheet at ${fmt(lay.sw / MM)} × ${fmt(lay.sh / MM)}`
-      : `${lay.per} photos of ${fmt(lay.sw / MM)} × ${fmt(lay.sh / MM)} fit on one ${paperName} sheet. Add photos to begin.`;
+      ? `${list.length} photo${list.length > 1 ? 's' : ''} on ${sheets} sheet${sheets > 1 ? 's' : ''} of ${paperName}, ${lay.per} per sheet at ${fmt(Math.min(...o.slot) / MM)} × ${fmt(Math.max(...o.slot) / MM)}`
+      : `${lay.per} photos of ${fmt(Math.min(...o.slot) / MM)} × ${fmt(Math.max(...o.slot) / MM)} fit on one ${paperName} sheet. Add photos to begin.`;
     $('#sheet').innerHTML = sheetSVG(lay, list, state.sheet, o);
     $('#sheetCap').textContent = `${paperName}, ${lay.W > lay.H ? 'landscape' : 'portrait'}. Dashed line is your printer margin.`;
   }
@@ -262,11 +305,12 @@
     const sheets = Math.ceil(list.length / lay.per);
     for (let sh = 0; sh < sheets; sh++) {
       const page = out.addPage([lay.W, lay.H]);
-      lay.positions.forEach((pos, k) => {
-        const ph = list[sh * lay.per + k];
+      const photos = assign(list, lay, sh);
+      lay.slots.forEach((pos, k) => {
+        const ph = photos[k];
         if (!ph) return;
-        const pl = place(ph, pos.x, pos.y, lay.sw, lay.sh, o);
-        page.pushOperators(pushGraphicsState(), rectangle(pos.x, pos.y, lay.sw, lay.sh), clip(), endPath());
+        const pl = place(ph, pos.x, pos.y, pos.w, pos.h, o);
+        page.pushOperators(pushGraphicsState(), rectangle(pos.x, pos.y, pos.w, pos.h), clip(), endPath());
         if (pl.turn) {
           const r = rot(pl.cx - pl.nh / 2, pl.cy - pl.nw / 2, pl.nh, pl.nw);
           page.drawImage(emb.get(ph.id), { x: r.x, y: r.y, width: r.width, height: r.height, rotate: degrees(r.deg) });
@@ -276,9 +320,9 @@
         page.pushOperators(popGraphicsState());
       });
       if (o.border) {
-        lay.positions.forEach((pos, k) => {
-          if (!list[sh * lay.per + k]) return;
-          page.drawRectangle({ x: pos.x, y: pos.y, width: lay.sw, height: lay.sh, borderColor: grey, borderWidth: 0.4, opacity: 0, borderOpacity: 1 });
+        lay.slots.forEach((pos, k) => {
+          if (!photos[k]) return;
+          page.drawRectangle({ x: pos.x, y: pos.y, width: pos.w, height: pos.h, borderColor: grey, borderWidth: 0.4, opacity: 0, borderOpacity: 1 });
         });
       }
       if (o.ruler) {
