@@ -33,28 +33,20 @@
         entry.aspect = v1.width / v1.height;
         entry.thumb = await thumbOf(p);
         doc.destroy();
-      } else if (/^image\//.test(file.type)) {
+      } else if (/^image\//.test(file.type) || /\.svg$/i.test(file.name)) {
         entry.type = 'image';
-        const bmp = await createImageBitmap(file);
-        entry.aspect = bmp.width / bmp.height;
-        if (file.type === 'image/png' || file.type === 'image/jpeg') {
-          entry.mime = file.type;
-          entry.bytes = await readBuf(file);
-        } else {
-          const c = document.createElement('canvas');
-          c.width = bmp.width; c.height = bmp.height;
-          c.getContext('2d').drawImage(bmp, 0, 0);
-          const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
-          entry.mime = 'image/png';
-          entry.bytes = await blob.arrayBuffer();
-        }
-        entry.thumb = URL.createObjectURL(new Blob([entry.bytes], { type: entry.mime }));
+        const img = await PrintImages.readImage(file);
+        entry.mime = img.mime;
+        entry.bytes = img.bytes;
+        entry.sizePt = img.sizePt;
+        entry.aspect = img.aspect;
+        entry.thumb = img.thumb;
       } else {
         throw new Error('unsupported');
       }
       state.files.push(entry);
     } catch (e) {
-      alert(`${file.name} could not be read. Use a PDF, PNG, JPG, WebP or GIF. Word and Pages files need to be exported as PDF first.`);
+      alert(`${file.name} could not be read. Use a PDF, PNG, JPG, SVG, WebP or GIF. Word and Pages files need to be exported as PDF first.`);
     }
   }
 
@@ -169,7 +161,7 @@
       jobName: first ? first.name.replace(/\.[^.]+$/, '') : 'Document',
     };
   }
-  const sources = () => state.files.map((f) => ({ type: f.type, bytes: f.bytes, mime: f.mime, name: f.name, range: f.range }));
+  const sources = () => state.files.map((f) => ({ type: f.type, bytes: f.bytes, mime: f.mime, name: f.name, range: f.range, sizePt: f.sizePt }));
 
   /* ---------- show / hide options ---------- */
   function updateVisibility() {

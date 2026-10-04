@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1791122436">
+<link rel="stylesheet" href="style.css?v=1791123138">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -61,8 +61,8 @@
     <section class="card">
       <h2><span class="n" aria-hidden="true">3</span>Artwork and lines</h2>
       <div class="drop" id="drop">
-        <input type="file" id="artInput" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif">
-        <p><strong>Optional artwork.</strong> <label for="artInput" class="link">Choose an image or PDF</label>.</p>
+        <input type="file" id="artInput" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg">
+        <p><strong>Optional artwork.</strong> <label for="artInput" class="link">Choose a PDF, PNG, JPG or SVG</label>.</p>
         <p class="hint">It fills the whole template, plus the bleed, behind the lines. Design it at the size shown in “Panels”.</p>
       </div>
       <p class="artname" id="artName" hidden></p>
@@ -102,7 +102,8 @@
 </main>
 
 <script src="vendor/pdf-lib.min.js"></script>
-<script src="templates-engine.js?v=1791122436"></script>
-<script src="templates.js?v=1791122436"></script>
+<script src="imageutil.js?v=1791123138"></script>
+<script src="templates-engine.js?v=1791123138"></script>
+<script src="templates.js?v=1791123138"></script>
 </body>
 </html>

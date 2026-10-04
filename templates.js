@@ -100,18 +100,12 @@
     try {
       if (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)) {
         state.art = { type: 'pdf', bytes: await f.arrayBuffer(), name: f.name };
-      } else if (f.type === 'image/png' || f.type === 'image/jpeg') {
-        state.art = { type: 'image', mime: f.type, bytes: await f.arrayBuffer(), name: f.name };
-      } else if (/^image\//.test(f.type)) {
-        const bmp = await createImageBitmap(f);
-        const c = document.createElement('canvas');
-        c.width = bmp.width; c.height = bmp.height;
-        c.getContext('2d').drawImage(bmp, 0, 0);
-        const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
-        state.art = { type: 'image', mime: 'image/png', bytes: await blob.arrayBuffer(), name: f.name };
+      } else if (/^image\//.test(f.type) || /\.svg$/i.test(f.name)) {
+        const img = await PrintImages.readImage(f);
+        state.art = { type: 'image', mime: img.mime, bytes: img.bytes, name: f.name };
       } else throw new Error('type');
     } catch (err) {
-      alert('That file could not be used. Choose a PDF, PNG, JPG, WebP or GIF.');
+      alert('That file could not be used. Choose a PDF, PNG, JPG, SVG, WebP or GIF.');
       return;
     }
     update();

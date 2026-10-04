@@ -329,8 +329,8 @@
       if (src.type === 'blank') { items.push({ blank: true, w: 612, h: 792 }); continue; }
       if (src.type === 'image') {
         const img = src.mime === 'image/jpeg' ? await out.embedJpg(src.bytes) : await out.embedPng(src.bytes);
-        const sc = 0.75;
-        items.push({ kind: 'img', ref: img, w: img.width * sc, h: img.height * sc, rot: 0, name: src.name });
+        const sz = src.sizePt || [img.width * 0.75, img.height * 0.75];
+        items.push({ kind: 'img', ref: img, w: sz[0], h: sz[1], rot: 0, name: src.name });
         continue;
       }
       const doc = await PDFDocument.load(src.bytes, { ignoreEncryption: true });

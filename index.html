@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1791122436">
+<link rel="stylesheet" href="style.css?v=1791123138">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -28,9 +28,10 @@
     <section class="card">
       <h2><span class="n" aria-hidden="true">1</span>Files</h2>
       <div class="drop" id="drop">
-        <input type="file" id="fileInput" multiple accept="application/pdf,image/png,image/jpeg,image/webp,image/gif">
-        <p><strong>Drop PDFs or images here</strong>, or <label for="fileInput" class="link">choose files</label>.</p>
+        <input type="file" id="fileInput" multiple accept="application/pdf,image/png,image/jpeg,image/webp,image/gif,image/svg+xml,.svg">
+        <p><strong>Drop PDFs, PNG, JPG or SVG files here</strong>, or <label for="fileInput" class="link">choose files</label>.</p>
         <p class="hint">Files print in the order listed. Word, Pages and Google Docs files need to be exported as PDF first.</p>
+        <p class="hint">PDF is best. PNG should be 300 dpi at the finished size. SVG is turned into a 300 dpi image at its own size, so convert text to outlines first or the fonts may change.</p>
       </div>
       <ul class="files" id="fileList"></ul>
       <div class="row">
@@ -240,7 +241,8 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="engine.js?v=1791122436"></script>
-<script src="app.js?v=1791122436"></script>
+<script src="imageutil.js?v=1791123138"></script>
+<script src="engine.js?v=1791123138"></script>
+<script src="app.js?v=1791123138"></script>
 </body>
 </html>
