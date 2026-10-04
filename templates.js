@@ -3,7 +3,7 @@
   const $ = (s) => document.querySelector(s);
   const E = window.TemplateEngine;
   const MM = E.MM;
-  const PAPERS = { letter: [612, 792], legal: [612, 1008], tabloid: [792, 1224], a4: [595.28, 841.89], a3: [841.89, 1190.55], a5: [419.53, 595.28], a6: [297.64, 419.53] };
+  const PAPERS = { a4: [595.28, 841.89], letter: [612, 792], a5: [419.53, 595.28], a6: [297.64, 419.53] };
   const UNITMM = { mm: 1, in: 25.4 };
   const state = { unit: 'mm', type: 'card', vals: {}, art: null };
   const KEY = 'printdesk.templates';
@@ -76,7 +76,7 @@
 
   function save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ unit: state.unit, paper: $('#paper').value, orientation: $('#orientation').value, copies: $('#copies').value }));
+      localStorage.setItem(KEY, JSON.stringify({ unit: state.unit, paper: PAPERS[$('#paper').value] ? $('#paper').value : 'a4', orientation: $('#orientation').value, copies: $('#copies').value }));
     } catch (e) { /* storage unavailable */ }
   }
   function restore() {
@@ -84,7 +84,10 @@
       const s = JSON.parse(localStorage.getItem(KEY) || 'null');
       if (!s) return;
       state.unit = s.unit || 'mm'; $('#unit').value = state.unit;
-      ['paper', 'orientation', 'copies'].forEach((k) => { if (s[k]) $('#' + k).value = s[k]; });
+      ['paper', 'orientation', 'copies'].forEach((k) => {
+        const el = $('#' + k);
+        if (s[k] && [...el.options].some((o) => o.value === s[k])) el.value = s[k];
+      });
       document.querySelectorAll('.dim').forEach((el) => { el.value = toDisp(+el.dataset.mm); });
     } catch (e) { /* ignore */ }
   }
@@ -119,7 +122,7 @@
   function opts() {
     const inch = state.unit === 'in';
     return {
-      paper: PAPERS[$('#paper').value],
+      paper: PAPERS[$('#paper').value] || PAPERS.a4,
       orientation: $('#orientation').value,
       margin: dimMM('margin') * MM,
       gap: dimMM('gap'),
@@ -176,7 +179,7 @@
     $('#shape').innerHTML = E.toSVG(tpl, { labels: true, pad: 4, sized: false, cut: '#C0310B', fold: '#1B1A18', sw: 0.5 });
     $('#shapeCap').textContent = `${T.name}: ${fmt(tpl.w)} × ${fmt(tpl.h)}. Solid is cut, dashed is fold.`;
     $('#paperMap').innerHTML = paperMap(lay);
-    const paperName = $('#paper').selectedOptions[0].textContent.split(' ')[0];
+    const paperName = ($('#paper').selectedOptions[0] || { textContent: 'A4' }).textContent.split(' ')[0];
     if (lay.mode === 'grid') {
       const n = lay.nx * lay.ny;
       $('#summary').textContent = `${n} cop${n > 1 ? 'ies' : 'y'} on one ${paperName} sheet, true size`;

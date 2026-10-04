@@ -139,35 +139,44 @@
   function genPocket(p) {
     const { w, h, g, hole, hd, wm, r } = p;
     const topBlock = hd + hole / 2 + 3;
-    const iw = w - 4;
-    const ih = h - topBlock - 2;
-    const wx = 2 + wm;
-    const wy = topBlock + wm;
-    const ww = iw - 2 * wm;
+    // The insert sits against the fold, between the side flap and the fold, above the bottom flap.
+    const iw = w - g - 2;
+    const ih = h - topBlock - g - 1;
+    const ix = g + 1;
+    const iy = topBlock;
+    // The window is centred on the pocket but kept inside the insert.
+    const wx = Math.max(wm, g + 4);
+    const wy = iy + wm;
+    const ww = w - 2 * wx;
     const wh = ih - 2 * wm;
     const outline = [
-      [0, 0], [w, 0], [w, h + 3], [w + g, h + 3 + g * 0.4], [w + g, 2 * h - g * 0.4], [w, 2 * h],
-      [0, 2 * h], [-g, 2 * h - g * 0.4], [-g, h + 3 + g * 0.4], [0, h + 3],
+      [0, 0], [2 * w, 0], [2 * w, 3], [2 * w + g, 3 + g * 0.4], [2 * w + g, h - 3 - g * 0.4], [2 * w, h - 3],
+      [2 * w - 3, h], [2 * w - 3 - g * 0.4, h + g], [w + 3 + g * 0.4, h + g], [w + 3, h],
+      [0, h],
     ];
     const cut = [closed(outline), closed(roundedRect(wx, wy, ww, wh, r))];
     if (hole > 0) {
       cut.push(closed(circle(w / 2, hd, hole / 2)));
-      cut.push(closed(circle(w / 2, 2 * h - hd, hole / 2)));
+      cut.push(closed(circle(1.5 * w, hd, hole / 2)));
     }
-    const fold = [[0, h, w, h], [0, h + 3, 0, 2 * h], [w, h + 3, w, 2 * h]];
+    const fold = [[w, 0, w, h], [2 * w, 3, 2 * w, h - 3], [w + 3, h, 2 * w - 3, h]];
     const panels = [
       { label: 'Window opening', x: wx, y: wy, w: ww, h: wh },
-      { label: 'Front panel', x: 0, y: 0, w, h, lx: w / 2, ly: Math.max(topBlock / 2 + 1, 4) },
-      { label: 'Back panel', x: 0, y: h, w, h },
+      { label: 'Front panel', x: 0, y: 0, w, h, lx: w / 2, ly: topBlock + 3 },
+      { label: 'Back panel', x: w, y: 0, w, h },
     ];
     if (p.insert === 'yes') {
-      const ox = w + g + 14;
+      const ox = 2 * w + g + 14;
       cut.push(closed(roundedRect(ox, 0, iw, ih, Math.min(r, 4))));
+      // dashed guide: where the window falls on the insert
+      const gx = ox + (wx - ix);
+      const gy = wy - iy;
+      fold.push([gx, gy, gx + ww, gy], [gx + ww, gy, gx + ww, gy + wh], [gx + ww, gy + wh, gx, gy + wh], [gx, gy + wh, gx, gy]);
       panels.push({ label: 'Insert card', x: ox, y: 0, w: iw, h: ih });
     }
     return {
       cut, fold, panels,
-      notes: `Fold on the dashed line at the bottom so the window panel lies over the back. Glue the two side flaps inside the front panel. The insert slides in from the top and shows through the window. It is ${+iw.toFixed(1)} × ${+ih.toFixed(1)} mm so it sits below the hang hole. Punch or cut the hole through both layers.`,
+      notes: `Cut on the solid lines, including the window and the holes. Fold the right-hand panel back behind the front on the dashed line, so the window faces out. Fold the side and bottom flaps forward and glue them to the inside of the front panel. The top stays open: the insert slides in from the top and shows through the window. Insert size: ${+iw.toFixed(1)} × ${+ih.toFixed(1)} mm. Punch the hang holes through both layers.`,
     };
   }
 
@@ -209,14 +218,14 @@
       gen: genTuck,
     },
     pocket: {
-      name: 'Window pocket with insert',
-      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. The insert card slides in behind the window.',
+      name: 'Window pocket',
+      desc: 'A folded pocket with a rounded window and a hang hole, like a badge or lanyard holder. You slide your own card in from the top. The two panels sit side by side so it fits on an A4 sheet.',
       fields: [
         { id: 'w', label: 'Pocket width', def: 110 }, { id: 'h', label: 'Pocket height', def: 160 },
-        { id: 'wm', label: 'Window margin (insert shows inside this)', def: 8, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
+        { id: 'wm', label: 'Window margin from the insert edge', def: 8, min: 0 }, { id: 'r', label: 'Window corner radius', def: 6, min: 0 },
         { id: 'hole', label: 'Hang hole diameter', def: 5, min: 0 }, { id: 'hd', label: 'Hole distance from top', def: 8, min: 2 },
-        { id: 'g', label: 'Side glue flap width', def: 10 },
-        { id: 'insert', label: 'Matching insert card', select: [['yes', 'Include the insert card'], ['no', 'Pocket only']], def: 'yes' },
+        { id: 'g', label: 'Glue flap width', def: 8 },
+        { id: 'insert', label: 'Insert card', select: [['no', 'Pocket only'], ['yes', 'Also draw an insert card (needs a wider sheet)']], def: 'no' },
       ],
       gen: genPocket,
     },
@@ -231,9 +240,9 @@
   };
 
   const PRESETS = [
-    { label: 'Badge pocket with window, 110 × 160 mm', type: 'pocket', v: { w: 110, h: 160, wm: 8, r: 6, hole: 5, hd: 8, g: 10, insert: 'yes' } },
-    { label: 'Badge pocket for a 4 × 6 in insert', type: 'pocket', v: { w: 108, h: 164, wm: 8, r: 6, hole: 5, hd: 8, g: 10, insert: 'yes' } },
-    { label: 'Small window pocket, A6', type: 'pocket', v: { w: 105, h: 148, wm: 7, r: 5, hole: 5, hd: 8, g: 10, insert: 'yes' } },
+    { label: 'Badge pocket with window, 110 × 160 mm', type: 'pocket', v: { w: 110, h: 160, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Badge pocket for a 4 × 6 in insert', type: 'pocket', v: { w: 108, h: 164, wm: 8, r: 6, hole: 5, hd: 8, g: 8, insert: 'no' } },
+    { label: 'Small window pocket, A6', type: 'pocket', v: { w: 105, h: 148, wm: 7, r: 5, hole: 5, hd: 8, g: 8, insert: 'no' } },
     { label: 'Event card insert, 4 × 6 in', type: 'card', v: { w: 101.6, h: 152.4, r: 0, hole: 0 } },
     { label: 'Invitation, 5 × 7 in', type: 'card', v: { w: 127, h: 178, r: 0, hole: 0 } },
     { label: 'Menu or program card, 4 × 9 in', type: 'card', v: { w: 101.6, h: 228.6, r: 0, hole: 0 } },
