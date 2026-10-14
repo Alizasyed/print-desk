@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cards · Print Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1791969644">
+</head>
+<body>
+<a class="skip" href="#controls">Skip to settings</a>
+<header class="top">
+  <div>
+    <h1 data-text="Cards">Cards</h1>
+    <nav class="sitenav" aria-label="Tools"><a href="./">Print Desk</a><a href="templates.html">Templates</a><a href="photos.html">Photos</a><a href="pattern.html">Pattern</a><a href="cards.html" aria-current="page">Cards</a></nav>
+    <p>Business cards, double-sided, at true size. Add the front and the back, and it fills an A4 sheet with cut marks, with the backs lined up behind the fronts.</p>
+  </div>
+  <label class="unit">Units
+    <select id="unit"><option value="mm">millimetres</option><option value="in">inches</option></select>
+  </label>
+</header>
+
+<main class="layout">
+  <form class="controls" id="controls" onsubmit="return false">
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">1</span>Your design</h2>
+      <div class="pair">
+        <div>
+          <div class="drop" id="dropFront">
+            <input type="file" id="frontInput" accept="application/pdf,image/png,image/jpeg,image/webp,image/svg+xml,.svg">
+            <p><strong>Front</strong><br><label for="frontInput" class="link">Choose a file</label></p>
+          </div>
+          <div class="thumbBox" id="frontBox" hidden><img id="frontImg" alt="Front of the card"><span id="frontName"></span></div>
+        </div>
+        <div>
+          <div class="drop" id="dropBack">
+            <input type="file" id="backInput" accept="application/pdf,image/png,image/jpeg,image/webp,image/svg+xml,.svg">
+            <p><strong>Back</strong><br><label for="backInput" class="link">Choose a file</label></p>
+          </div>
+          <div class="thumbBox" id="backBox" hidden><img id="backImg" alt="Back of the card"><span id="backName"></span></div>
+        </div>
+      </div>
+      <p class="hint">PDF, PNG, JPG or SVG. If your front is a PDF with two pages, page 2 is used as the back. Without a back, only the fronts print.</p>
+      <div class="row">
+        <button type="button" class="ghost" id="swap">Swap front and back</button>
+        <button type="button" class="ghost" id="clear">Clear</button>
+        <button type="button" class="ghost" id="sample">Try a sample card</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">2</span>Card size</h2>
+      <label>Size
+        <select id="preset"></select>
+      </label>
+      <div class="grid2">
+        <label>Width <input class="dim" id="cardW" type="number" min="10" step="any" value="88.9"></label>
+        <label>Height <input class="dim" id="cardH" type="number" min="10" step="any" value="50.8"></label>
+        <label>Direction
+          <select id="dir"><option value="landscape">Landscape (wide)</option><option value="portrait">Portrait (tall)</option></select>
+        </label>
+        <label>Fit
+          <select id="fit"><option value="fill">Fill the card (crops edges)</option><option value="fit">Whole design (white bars)</option></select>
+        </label>
+        <label>Bleed in your file <input class="dim" id="bleed" type="number" min="0" step="any" value="0">
+          <span class="hint">If your design includes extra edge for cutting (often 3 mm), enter it. Use 0 if the file is exactly the card size.</span></label>
+        <label class="check"><input type="checkbox" id="printBleed" checked> Print the bleed so small cutting errors show no white edge</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">3</span>Sheet</h2>
+      <div class="grid2">
+        <label>Paper
+          <select id="paper"><option value="a4">A4</option><option value="letter">Letter 8.5 × 11 in</option><option value="a5">A5</option></select>
+        </label>
+        <label>Sheet direction
+          <select id="sheetDir"><option value="portrait">Portrait (simplest)</option><option value="landscape">Landscape</option><option value="auto">Whichever fits most</option></select>
+        </label>
+        <label>How many cards <input id="count" type="number" min="1" max="500" placeholder="Fill the sheet">
+          <span class="hint">Leave empty to fill one sheet.</span></label>
+        <label>Margin (left, right, top) <input class="dim" id="margin" type="number" min="0" step="any" value="3"></label>
+        <label>Bottom margin <input class="dim" id="marginB" type="number" min="0" step="any" value="15">
+          <span class="hint">Many inkjets, including Epson L-series, cannot print the bottom 14 mm or so.</span></label>
+        <label>Gap between cards <input class="dim" id="gap" type="number" min="0" step="any" value="5"></label>
+        <label>Cut marks
+          <select id="marks"><option value="ticks">Small ticks in the gaps</option><option value="none">None</option></select>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="n" aria-hidden="true">4</span>Printer and alignment</h2>
+      <div class="grid2">
+        <label>Your printer
+          <select id="printer">
+            <option value="l3250">Epson EcoTank L3250 (one side at a time)</option>
+            <option value="auto">Printer with automatic double-sided</option>
+            <option value="single">Other one-sided printer</option>
+          </select>
+        </label>
+        <label>Printer flips on
+          <select id="flip"><option value="long">Long edge</option><option value="short">Short edge</option></select>
+        </label>
+        <label>Move the back to the right (mm) <input id="shiftX" type="number" step="0.1" value="0"></label>
+        <label>Move the back up (mm) <input id="shiftY" type="number" step="0.1" value="0">
+          <span class="hint">Print a test, hold it to the light, and nudge the back until it lines up. Negative moves left or down.</span></label>
+        <label class="check"><input type="checkbox" id="ruler" > Print a ruler to check the scale</label>
+      </div>
+    </section>
+  </form>
+
+  <aside class="preview">
+    <div class="stickyPane">
+      <div class="summary" id="summary">Add a front to begin.</div>
+      <div class="proof">
+        <label>Colour preview
+          <select id="proof">
+            <option value="">Screen colours (as designed)</option>
+            <option value="photo">Glossy or luster photo paper</option>
+            <option value="textured">Textured or matte paper</option>
+            <option value="inkjet">Home inkjet on plain paper</option>
+            <option value="uncoated">Uncoated card, commercial CMYK</option>
+            <option value="coated">Coated card, commercial CMYK</option>
+          </select>
+        </label>
+        <p class="hint" id="proofNote" hidden>Approximate. It mimics how four-colour ink dulls bright screen colours such as red and deep blue. It is not your printer’s real profile, so print a small test of the colours that matter.</p>
+      </div>
+      <div class="tpl-stage cardStage">
+        <figure><div id="frontSheet"></div><figcaption>Front</figcaption></figure>
+        <figure id="backFig"><div id="backSheet"></div><figcaption>Back (as it looks from the front once turned over)</figcaption></figure>
+      </div>
+      <div class="export">
+        <div class="manual" id="manualRow" hidden>
+          <div class="row">
+            <button type="button" class="primary" data-pass="fronts">1. Print fronts</button>
+            <button type="button" class="ghost" data-pass="backs">2. Print backs</button>
+            <button type="button" class="ghost" data-pass="backs-rev">2. Backs, reversed</button>
+          </div>
+        </div>
+        <div class="row" id="stdRow">
+          <button type="button" id="printNow" class="primary" disabled>Print</button>
+        </div>
+        <div class="row">
+          <button type="button" id="download" class="ghost" disabled>Download PDF</button>
+          <button type="button" id="scaleTest" class="ghost">Print a scale test</button>
+        </div>
+      </div>
+      <div class="howto">
+        <h3>How to print it double-sided</h3>
+        <ol id="steps"></ol>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/pdf.min.js"></script>
+<script src="softproof.js?v=1791969644"></script>
+<script src="imageutil.js?v=1791969644"></script>
+<script src="scaletest.js?v=1791969644"></script>
+<script src="cards.js?v=1791969644"></script>
+</body>
+</html>

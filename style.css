@@ -175,3 +175,11 @@ table.panels th { font-weight: 700; font-size: 12.5px; }
 .sw { width: 32px; height: 32px; min-height: 32px; padding: 0; border: 2px solid var(--ink); border-radius: 0; }
 .sw[aria-pressed=true] { box-shadow: 0 0 0 2px var(--paper-2), 0 0 0 4px var(--ink); }
 input[type=color] { width: 44px; height: 36px; min-height: 36px; padding: 2px; margin: 0; background: var(--paper); border: 2px solid var(--ink); border-radius: 0; cursor: pointer; }
+
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pair .drop { margin-bottom: 8px; padding: 14px 8px; }
+.thumbBox { display: grid; gap: 4px; justify-items: center; font-size: 12px; margin-bottom: 8px; }
+.thumbBox img { max-width: 100%; max-height: 110px; border: 1.5px solid var(--ink); background: #fff; }
+.thumbBox span { color: var(--ink-soft); overflow-wrap: anywhere; text-align: center; }
+.cardStage { grid-template-columns: 1fr 1fr; align-items: start; }
+@media (max-width: 520px) { .cardStage { grid-template-columns: 1fr; } .pair { grid-template-columns: 1fr; } }
