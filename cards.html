@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1792216878">
+<link rel="stylesheet" href="style.css?v=1792217006">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -82,12 +82,14 @@
         </label>
         <label>How many cards <input id="count" type="number" min="1" max="500" placeholder="Fill the sheet">
           <span class="hint">Leave empty to fill one sheet.</span></label>
-        <label>Margin (left, right, top) <input class="dim" id="margin" type="number" min="0" step="any" value="3"></label>
+        <label>Left and right margin <input class="dim" id="margin" type="number" min="0" step="any" value="3"></label>
+        <label>Top margin <input class="dim" id="marginT" type="number" min="0" step="any" value="8">
+          <span class="hint">If printing sits too close to the top edge, make this bigger. Printers cannot print right up to the paper edge, and the sheet can sit a little off when it feeds.</span></label>
         <label>Bottom margin <input class="dim" id="marginB" type="number" min="0" step="any" value="15">
           <span class="hint">Many inkjets, including Epson L-series, cannot print the bottom 14 mm or so.</span></label>
         <label>Gap between cards <input class="dim" id="gap" type="number" min="0" step="any" value="5"></label>
         <label>Cut marks
-          <select id="marks"><option value="ticks">Small ticks in the gaps</option><option value="none">None</option></select>
+          <select id="marks"><option value="both">Faint outline and ticks</option><option value="outline">Faint outline only</option><option value="ticks">Small ticks in the gaps</option><option value="none">None</option></select>
         </label>
       </div>
     </section>
@@ -168,9 +170,9 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="softproof.js?v=1792216878"></script>
-<script src="imageutil.js?v=1792216878"></script>
-<script src="scaletest.js?v=1792216878"></script>
-<script src="cards.js?v=1792216878"></script>
+<script src="softproof.js?v=1792217006"></script>
+<script src="imageutil.js?v=1792217006"></script>
+<script src="scaletest.js?v=1792217006"></script>
+<script src="cards.js?v=1792217006"></script>
 </body>
 </html>

@@ -150,7 +150,7 @@
       ch: land ? Math.min(a, b) : Math.max(a, b),
       fit: $('#fit').value, bleed: dimMM('bleed'), printBleed: $('#printBleed').checked,
       paper: $('#paper').value, sheetDir: $('#sheetDir').value, count: parseInt($('#count').value, 10) || 0,
-      margin: dimMM('margin'), marginB: dimMM('marginB'), gap: dimMM('gap'),
+      margin: dimMM('margin'), marginT: dimMM('marginT'), marginB: dimMM('marginB'), gap: dimMM('gap'),
       marks: $('#marks').value, flip: $('#flip').value,
       shiftX: parseFloat($('#shiftX').value) || 0, shiftY: parseFloat($('#shiftY').value) || 0,
       ruler: $('#ruler').checked, printer: $('#printer').value,
@@ -160,7 +160,8 @@
   // all layout maths in millimetres, y pointing up
   function layout(o) {
     const [pw, ph] = PAPERS[o.paper] || PAPERS.a4;
-    const ge = Math.max(o.gap, o.printBleed && o.bleed > 0 ? 2 * o.bleed + 3 : 0);
+    const needTicks = o.marks === 'ticks' || o.marks === 'both';
+    const ge = Math.max(o.gap, o.printBleed && o.bleed > 0 ? 2 * o.bleed + (needTicks ? 6 : 3) : 0);
     const ruler = o.ruler ? 6.5 : 0;
     let best = null;
     const dirs = o.sheetDir === 'portrait' ? [[pw, ph]] : o.sheetDir === 'landscape' ? [[ph, pw]] : [[pw, ph], [ph, pw]];
@@ -168,7 +169,7 @@
       // A landscape page prints rotated on portrait paper, so the unprintable strip lands on its sides, not its bottom.
       const a = W > H
         ? { x: o.marginB, y: o.margin + ruler, w: W - 2 * o.marginB, h: H - 2 * o.margin - ruler }
-        : { x: o.margin, y: o.marginB + ruler, w: W - 2 * o.margin, h: H - o.margin - o.marginB - ruler };
+        : { x: o.margin, y: o.marginB + ruler, w: W - 2 * o.margin, h: H - o.marginT - o.marginB - ruler };
       const nx = Math.floor((a.w + ge + 1e-6) / (o.cw + ge));
       const ny = Math.floor((a.h + ge + 1e-6) / (o.ch + ge));
       if (nx < 1 || ny < 1) continue;
@@ -256,7 +257,7 @@
       steps.push('Put the stack back in the tray the same way you loaded the blank paper, then press “2. Print backs”. If you have more than one sheet and the backs come out in the wrong order, use “2. Backs, reversed”.');
       steps.push('Hold the test sheet to the light. If the back is off, use “Move the back” under Printer and alignment, and test again.');
     }
-    steps.push(o.marks === 'ticks' ? 'Cut along the small tick marks in the gaps, using a ruler and a craft knife, or a guillotine.' : 'Cut along the card edges.');
+    steps.push(o.marks === 'none' ? 'Cut along the card edges.' : o.marks === 'outline' ? 'Cut along the faint outline, using a ruler and a craft knife, or a guillotine. Cut just outside the line so it does not show on the card.' : o.marks === 'ticks' ? 'Cut along the small tick marks in the gaps, using a ruler and a craft knife, or a guillotine.' : 'Line up your ruler with the tick marks and cut along the faint outline, just outside the line so it does not show on the card.');
     const ol = $('#steps');
     ol.innerHTML = '';
     steps.forEach((t) => ol.append(Object.assign(document.createElement('li'), { textContent: t })));
@@ -338,7 +339,10 @@
           if (art.img) page.drawImage(art.ref, args); else page.drawPage(art.ref, args);
           page.pushOperators(popGraphicsState());
         }
-        if (o.marks === 'ticks') {
+        if (o.marks === 'outline' || o.marks === 'both') {
+          page.drawRectangle({ x: tx, y: ty, width: tw, height: th, borderColor: rgb(0.62, 0.62, 0.62), borderWidth: 0.3, opacity: 0, borderOpacity: 1 });
+        }
+        if (o.marks === 'ticks' || o.marks === 'both') {
           const off = (o.printBleed ? o.bleed : 0) + 0.8;
           const len = Math.min(2.5, lay.ge / 2 - off - 0.4);
           if (len >= 0.6) {
