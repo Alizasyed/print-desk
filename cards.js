@@ -278,12 +278,20 @@
       page.drawLine({ start: { x: x - arm, y }, end: { x: x + arm, y }, thickness: 0.4, color: black });
       page.drawLine({ start: { x, y: y - arm }, end: { x, y: y + arm }, thickness: 0.4, color: black });
     };
+    // five crosses only: the four corners of the card area and its centre
     const N = Math.min(o.count || lay.per, lay.per);
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     for (let j = 0; j < N; j++) {
-      const p = side === 'front' ? lay.front(j) : lay.back(j);
-      const x0 = p.x * MM, y0 = p.y * MM, w = o.cw * MM, h = o.ch * MM;
-      [[x0, y0], [x0 + w, y0], [x0, y0 + h], [x0 + w, y0 + h], [x0 + w / 2, y0 + h / 2]].forEach(([x, y]) => cross(x, y));
+      const p = lay.front(j);
+      minX = Math.min(minX, p.x); minY = Math.min(minY, p.y);
+      maxX = Math.max(maxX, p.x + o.cw); maxY = Math.max(maxY, p.y + o.ch);
     }
+    const pts = [[minX, maxY], [maxX, maxY], [minX, minY], [maxX, minY], [(minX + maxX) / 2, (minY + maxY) / 2]];
+    pts.forEach(([x, y]) => {
+      // turning the sheet over mirrors the mark; the back shift is then applied on top
+      const q = side === 'front' ? [x, y] : (lay.mirrorCols ? [lay.W - x + o.shiftX, y + o.shiftY] : [x + o.shiftX, lay.H - y + o.shiftY]);
+      cross(q[0] * MM, q[1] * MM);
+    });
     page.drawText(side === 'front' ? 'ALIGNMENT TEST: FRONT' : 'ALIGNMENT TEST: BACK (shift applied: ' + o.shiftX + ' mm across, ' + o.shiftY + ' mm up)', { x: o.margin * MM + 4, y: lay.H * MM - 14, size: 7, font, color: black });
     return out.save();
   }
