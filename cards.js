@@ -263,7 +263,33 @@
   }
 
   /* ---------- PDF ---------- */
+  async function buildAlign(side) {
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    const o = opts();
+    const lay = layout(o);
+    if (!lay) throw new Error('Check the card fits the paper.');
+    const out = await PDFDocument.create();
+    const font = await out.embedFont(StandardFonts.Helvetica);
+    const page = out.addPage([lay.W * MM, lay.H * MM]);
+    const black = rgb(0, 0, 0);
+    const arm = 2.5 * MM;
+    const cross = (x, y) => {
+      page.drawLine({ start: { x: x - arm, y }, end: { x: x + arm, y }, thickness: 0.4, color: black });
+      page.drawLine({ start: { x, y: y - arm }, end: { x, y: y + arm }, thickness: 0.4, color: black });
+    };
+    const N = Math.min(o.count || lay.per, lay.per);
+    for (let j = 0; j < N; j++) {
+      const p = side === 'front' ? lay.front(j) : lay.back(j);
+      const x0 = p.x * MM, y0 = p.y * MM, w = o.cw * MM, h = o.ch * MM;
+      [[x0, y0], [x0 + w, y0], [x0, y0 + h], [x0 + w, y0 + h], [x0 + w / 2, y0 + h / 2]].forEach(([x, y]) => cross(x, y));
+    }
+    page.drawText(side === 'front' ? 'ALIGNMENT TEST: FRONT' : 'ALIGNMENT TEST: BACK (shift applied: ' + o.shiftX + ' mm across, ' + o.shiftY + ' mm up)', { x: o.margin * MM + 4, y: lay.H * MM - 14, size: 7, font, color: black });
+    return out.save();
+  }
+
   async function buildPDF(which) {
+    if (which === 'alignfront') return buildAlign('front');
+    if (which === 'alignback') return buildAlign('back');
     const { PDFDocument, StandardFonts, rgb, pushGraphicsState, popGraphicsState, rectangle, clip, endPath } = PDFLib;
     const o = opts();
     const lay = layout(o);
@@ -360,6 +386,7 @@
     } catch (e) { $('#summary').textContent = e.message || 'Could not prepare the print job.'; }
   }
   $('#printNow').addEventListener('click', () => printPDF('all'));
+  document.querySelectorAll('.alignBox [data-pass]').forEach((b) => b.addEventListener('click', () => printPDF(b.dataset.pass)));
   document.querySelectorAll('#manualRow [data-pass]').forEach((b) => b.addEventListener('click', () => printPDF(b.dataset.pass)));
   $('#download').addEventListener('click', async () => {
     try {

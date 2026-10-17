@@ -183,3 +183,6 @@ input[type=color] { width: 44px; height: 36px; min-height: 36px; padding: 2px; m
 .thumbBox span { color: var(--ink-soft); overflow-wrap: anywhere; text-align: center; }
 .cardStage { grid-template-columns: 1fr 1fr; align-items: start; }
 @media (max-width: 520px) { .cardStage { grid-template-columns: 1fr; } .pair { grid-template-columns: 1fr; } }
+
+.alignBox { margin-top: 14px; padding: 12px 14px 4px; background: var(--paper); border: 2px dashed var(--ink); }
+.alignBox h3 { font-size: 17px; margin-bottom: 6px; }

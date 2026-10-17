@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1791969644">
+<link rel="stylesheet" href="style.css?v=1792216878">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -110,6 +110,15 @@
           <span class="hint">Print a test, hold it to the light, and nudge the back until it lines up. Negative moves left or down.</span></label>
         <label class="check"><input type="checkbox" id="ruler" > Print a ruler to check the scale</label>
       </div>
+      <div class="alignBox">
+        <h3>Alignment test</h3>
+        <p class="hint">Prints cross marks where the corners and centre of each card will sit. Print the front, turn the sheet over the same way you will for the real job, then print the back. Hold it up to the light.</p>
+        <div class="row">
+          <button type="button" class="ghost" data-pass="alignfront">Print test front</button>
+          <button type="button" class="ghost" data-pass="alignback">Print test back</button>
+        </div>
+        <p class="hint">Look at the <b>back</b> side, upright. The front crosses show through. If the back crosses sit 1 mm to the right of them, type -1 in “Move the back to the right”. If they sit 1 mm too high, type -1 in “Move the back up”. Then print the test again.</p>
+      </div>
     </section>
   </form>
 
@@ -159,9 +168,9 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="softproof.js?v=1791969644"></script>
-<script src="imageutil.js?v=1791969644"></script>
-<script src="scaletest.js?v=1791969644"></script>
-<script src="cards.js?v=1791969644"></script>
+<script src="softproof.js?v=1792216878"></script>
+<script src="imageutil.js?v=1792216878"></script>
+<script src="scaletest.js?v=1792216878"></script>
+<script src="cards.js?v=1792216878"></script>
 </body>
 </html>
