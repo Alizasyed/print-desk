@@ -139,7 +139,7 @@
     const first = state.files[0];
     return {
       layout: radio === 'banner' ? 'poster' : radio,
-      paper: $('#paper').value,
+      paper: $('#paper').value || 'a4',
       customPaper: [dim('customW') || 612, dim('customH') || 792],
       orientation: $('#orientation').value,
       margins: { top: m, left: m, bottom: $('#printer').value === 'l3250' ? Math.max(m, 15 * PT.mm) : m, right: m },
@@ -164,11 +164,47 @@
   const sources = () => state.files.map((f) => ({ type: f.type, bytes: f.bytes, mime: f.mime, name: f.name, range: f.range, sizePt: f.sizePt }));
 
   /* ---------- show / hide options ---------- */
+  const PAPER_TYPES = {
+    plain: { proof: 'inkjet', twoSided: true, note: 'Plain paper. In the Epson print dialog set Paper Type to Plain paper and Quality to Standard. Heavy solid colour on thin plain paper (80 gsm or less) can show through the back, so keep big dark fills to a minimum.' },
+    glossy1: { proof: 'photo', twoSided: false, note: 'Glossy, printable on one side only. In the Epson dialog choose the closest glossy photo paper type, such as Premium Glossy Photo Paper, and High quality. Let prints dry before stacking them.' },
+    glossy2: { proof: 'photo', twoSided: true, note: 'Glossy on both sides, so double-sided jobs work. In the Epson dialog choose the closest glossy photo paper type and High quality. Let the first side dry 10 to 30 minutes before printing the back.' },
+    luster: { proof: 'photo', twoSided: false, note: 'Luster or RC photo paper, printable on one side only. In the Epson dialog choose the matching photo paper type, such as Premium Luster or the closest photo option, and High quality. Do not use it for double-sided jobs.' },
+    textured: { proof: 'textured', twoSided: false, note: 'Textured or matte paper, printable on one side only. In the Epson dialog choose a Matte paper type. Dark solid colours look softer on textured stock.' },
+  };
+  const PAPER_KEY = 'printdesk.paperChoice';
+  function updatePaperNote() {
+    const note = $('#paperNote');
+    const size = $('#paper').value;
+    const type = PAPER_TYPES[$('#paperType').value];
+    if (!size && !type) return;
+    let text = '';
+    if (size) text += `Paper size: ${$('#paper').selectedOptions[0].textContent}. Choose the same size in the print dialog, or the page gets shrunk or cropped. `;
+    if (type) text += type.note;
+    else text += 'Choose the paper type to see which print dialog settings to use.';
+    const l = layoutValue();
+    const needsBacks = l === 'booklet' || l === 'trifold' || (l === 'nup' && $('#duplex').checked);
+    const bad = !!type && needsBacks && !type.twoSided;
+    if (bad) text += ' Warning: this layout prints on both sides, but this paper takes ink on one side only.';
+    note.textContent = text;
+    note.classList.toggle('err', bad);
+  }
+  function applyPaperType() {
+    const t = PAPER_TYPES[$('#paperType').value];
+    if (t && PrintProof.PROFILES[t.proof]) { $('#proof').value = t.proof; proofUI(); }
+    try { localStorage.setItem(PAPER_KEY, JSON.stringify({ paper: $('#paper').value, type: $('#paperType').value })); } catch (e) { /* ignore */ }
+    updatePaperNote();
+    if (state.built) renderUnit(state.token);
+    schedule();
+  }
+  $('#paperType').addEventListener('change', applyPaperType);
+  $('#paper').addEventListener('change', () => { try { localStorage.setItem(PAPER_KEY, JSON.stringify({ paper: $('#paper').value, type: $('#paperType').value })); } catch (e) { /* ignore */ } updatePaperNote(); schedule(); });
+
   function updateVisibility() {
     const l = layoutValue();
     $$('[data-for]').forEach((el) => { el.hidden = !el.dataset.for.split(' ').includes(l); });
     $$('[data-when=duplex]').forEach((el) => { el.hidden = el.hidden || !$('#duplex').checked; });
     document.body.classList.toggle('custom-paper', $('#paper').value === 'custom');
+    updatePaperNote();
     const hasBacks = l === 'booklet' || l === 'trifold' || (l === 'nup' && $('#duplex').checked);
     const manual = hasBacks && $('#printer').value !== 'auto';
     $('#outputWrap').hidden = !hasBacks || manual;
@@ -255,9 +291,12 @@
   async function rebuild() {
     const my = ++state.token;
     const has = state.files.length > 0;
-    $('#download').disabled = !has;
-    $('#openPrint').disabled = !has;
-    $('#printNow').disabled = !has;
+    const ready = has && !!$('#paper').value && !!$('#paperType').value;
+    $('#download').disabled = !ready;
+    $('#openPrint').disabled = !ready;
+    $('#printNow').disabled = !ready;
+    $$('#manualRow [data-pass]').forEach((b) => { b.disabled = !ready; });
+    $('#paperPrompt').hidden = !has || ready;
     if (!has) {
       state.built = null;
       setSummary('Add a file to begin.');
@@ -470,6 +509,11 @@
   try { const p = localStorage.getItem('printdesk.printer'); if (p) $('#printer').value = p; } catch (e) { /* ignore */ }
   if ($('#printer').value === 'l3250' && !localStorage.getItem('printdesk.printer')) setDim('margin', 3 * PT.mm);
   try { const pv = localStorage.getItem('printdesk.proof'); if (pv && PrintProof.PROFILES[pv]) $('#proof').value = pv; } catch (e) { /* ignore */ }
+  try {
+    const pc = JSON.parse(localStorage.getItem(PAPER_KEY) || 'null');
+    if (pc && pc.paper && [...$('#paper').options].some((o) => o.value === pc.paper)) $('#paper').value = pc.paper;
+    if (pc && PAPER_TYPES[pc.type]) { $('#paperType').value = pc.type; $('#proof').value = PAPER_TYPES[pc.type].proof; }
+  } catch (e) { /* ignore */ }
   proofUI();
   showExplain();
   fillPresets();

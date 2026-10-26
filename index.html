@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1791969644">
+<link rel="stylesheet" href="style.css?v=1792977404">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -24,6 +24,32 @@
 
 <main class="layout">
   <form class="controls" id="controls" onsubmit="return false">
+
+    <section class="card" id="paperCard">
+      <h2><span class="n" aria-hidden="true">P</span>Your paper</h2>
+      <div class="grid2">
+        <label>Paper size
+          <select id="paper">
+            <option value="" disabled selected>Choose a size…</option>
+            <option value="a4">A4</option><option value="letter">Letter 8.5 × 11 in</option><option value="a5">A5</option>
+            <option value="a6">A6</option><option value="a3">A3</option><option value="legal">Legal 8.5 × 14 in</option>
+            <option value="tabloid">Tabloid 11 × 17 in</option><option value="halfletter">Half letter 5.5 × 8.5 in</option>
+            <option value="custom">Custom…</option>
+          </select>
+        </label>
+        <label>Paper type
+          <select id="paperType">
+            <option value="" disabled selected>Choose a type…</option>
+            <option value="plain">Plain paper</option>
+            <option value="glossy1">Glossy, one side</option>
+            <option value="glossy2">Glossy, both sides</option>
+            <option value="luster">Luster or photo paper (RC)</option>
+            <option value="textured">Textured or matte, one side</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint" id="paperNote">Choose what you are about to print on. The settings to pick in the print dialog will appear here, so the right amount of ink goes down.</p>
+    </section>
 
     <section class="card">
       <h2><span class="n" aria-hidden="true">1</span>Files</h2>
@@ -139,16 +165,8 @@
     </section>
 
     <section class="card">
-      <h2><span class="n" aria-hidden="true">3</span>Paper</h2>
+      <h2><span class="n" aria-hidden="true">3</span>Page setup</h2>
       <div class="grid2">
-        <label>Paper size
-          <select id="paper">
-            <option value="letter">Letter 8.5 × 11 in</option><option value="legal">Legal 8.5 × 14 in</option>
-            <option value="tabloid">Tabloid 11 × 17 in</option><option value="halfletter">Half letter 5.5 × 8.5 in</option>
-            <option value="a4">A4</option><option value="a3">A3</option><option value="a5">A5</option><option value="a6">A6</option>
-            <option value="custom">Custom…</option>
-          </select>
-        </label>
         <label data-for="nup poster banner">Sheet orientation
           <select id="orientation"><option value="auto">Automatic</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
         </label>
@@ -222,6 +240,7 @@
       </div>
       <div class="stage" id="stage"></div>
       <div class="export">
+        <p class="hint err" id="paperPrompt" hidden>Choose your paper size and type at the top first, so the print settings match what you load.</p>
         <div class="manual" id="manualRow" hidden>
           <p class="hint" id="manualHint">This printer prints one side at a time. Print the fronts, put the stack back in the tray, then print the backs.</p>
           <div class="row">
@@ -255,9 +274,9 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="imageutil.js?v=1791969644"></script>
-<script src="softproof.js?v=1791969644"></script>
-<script src="engine.js?v=1791969644"></script>
-<script src="app.js?v=1791969644"></script>
+<script src="imageutil.js?v=1792977404"></script>
+<script src="softproof.js?v=1792977404"></script>
+<script src="engine.js?v=1792977404"></script>
+<script src="app.js?v=1792977404"></script>
 </body>
 </html>

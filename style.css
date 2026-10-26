@@ -186,3 +186,5 @@ input[type=color] { width: 44px; height: 36px; min-height: 36px; padding: 2px; m
 
 .alignBox { margin-top: 14px; padding: 12px 14px 4px; background: var(--paper); border: 2px dashed var(--ink); }
 .alignBox h3 { font-size: 17px; margin-bottom: 6px; }
+
+.hint.err { color: var(--err); font-weight: 600; }
