@@ -138,7 +138,7 @@
     const m = dim('margin');
     const first = state.files[0];
     return {
-      layout: radio === 'banner' ? 'poster' : radio,
+      layout: radio === 'banner' ? 'poster' : radio === 'single' ? 'nup' : radio,
       paper: $('#paper').value || 'a4',
       customPaper: [dim('customW') || 612, dim('customH') || 792],
       orientation: $('#orientation').value,
@@ -149,9 +149,11 @@
       duplex: $('#duplex').checked,
       flip: $('#flip').value,
       booklet: { binding: $('#binding').value, sig: parseInt($('#sig').value, 10) || 0, staples: parseInt($('#staples').value, 10) || 0 },
-      nup: { across: int('across', 1, 12), down: int('down', 1, 12), repeat: $('#repeat').checked, order: $('#order').value, gap: dim('gap'), staple: $('#nupStaple').value },
+      nup: radio === 'single'
+        ? { across: 1, down: 1, repeat: false, order: 'rows', gap: 0, staple: 'none' }
+        : { across: int('across', 1, 12), down: int('down', 1, 12), repeat: $('#repeat').checked, order: $('#order').value, gap: dim('gap'), staple: $('#nupStaple').value },
       poster: { w: dim('posterW') || 72, h: dim('posterH') || 72, mode: radio === 'banner' ? 'crop' : $('#posterMode').value, overlap: dim('overlap') },
-      marks: $('#marks').value,
+      marks: radio === 'single' ? 'none' : $('#marks').value,
       border: $('#border').checked,
       header: { text: $('#headerText').value, size: +$('#headerSize').value || 10, align: $('#headerAlign').value },
       footer: { text: $('#footerText').value, size: +$('#headerSize').value || 10, align: $('#headerAlign').value },
@@ -182,7 +184,7 @@
     if (type) text += type.note;
     else text += 'Choose the paper type to see which print dialog settings to use.';
     const l = layoutValue();
-    const needsBacks = l === 'booklet' || l === 'trifold' || (l === 'nup' && $('#duplex').checked);
+    const needsBacks = l === 'booklet' || l === 'trifold' || ((l === 'nup' || l === 'single') && $('#duplex').checked);
     const bad = !!type && needsBacks && !type.twoSided;
     if (bad) text += ' Warning: this layout prints on both sides, but this paper takes ink on one side only.';
     note.textContent = text;
@@ -205,7 +207,7 @@
     $$('[data-when=duplex]').forEach((el) => { el.hidden = el.hidden || !$('#duplex').checked; });
     document.body.classList.toggle('custom-paper', $('#paper').value === 'custom');
     updatePaperNote();
-    const hasBacks = l === 'booklet' || l === 'trifold' || (l === 'nup' && $('#duplex').checked);
+    const hasBacks = l === 'booklet' || l === 'trifold' || ((l === 'nup' || l === 'single') && $('#duplex').checked);
     const manual = hasBacks && $('#printer').value !== 'auto';
     $('#outputWrap').hidden = !hasBacks || manual;
     $('#manualRow').hidden = !manual;
@@ -219,6 +221,7 @@
     booklet: ['Folded booklet', 'Pages print two to a landscape sheet in a scrambled order. Stack the sheets, fold the stack in half and staple along the fold, and the pages read in order.', 'Good for chapbooks, zines up to about 40 pages, programmes, workbooks and photo books. The page count rounds up to a multiple of 4. Use a smaller paper size, such as A5 or half letter, for a smaller booklet.'],
     zine: ['One-sheet zine', 'Eight pages from a single sheet of paper. Fold it in half, cut one slit across the middle, then fold it into a little book. No stapling and no extra tools.', 'Good for mini zines, maps, handouts and giveaways. Needs exactly 8 pages per zine, with page 1 as the cover.'],
     trifold: ['Tri-fold', 'Six panels, three on each side of one sheet, folded like a letter. The cover sits on the outside and the inside opens out flat.', 'Good for menus, price lists, event programmes, info leaflets and artist statements. Needs 6 pages per brochure.'],
+    single: ['One per sheet', 'Prints each page on its own sheet at full size, the way a normal document prints. No folding, cutting or rearranging.', 'Good for letters, essays, forms, worksheets and single-page art prints. Turn on “Print on both sides” to save paper on long documents.'],
     nup: ['Multi-up', 'Puts several pages on each sheet. “Cut and stack” orders them so the pages are in sequence once you cut the sheets and stack the piles.', 'Good for business cards, postcards, stickers, labels, handouts, contact sheets and saving paper. Turn on “Repeat” to fill the sheet with copies of the same page.'],
     poster: ['Poster', 'Blows one page up and splits it across several sheets. Print them, trim the white edge and tape or glue them together.', 'Good for art prints, event posters, wall charts and maps. The sheets overlap a little so there are no white gaps.'],
     banner: ['Banner', 'Like a poster, but very wide or very tall. It fills the width and crops the rest, so design along the top for a wide banner or down the left for a tall one.', 'Good for birthday banners, shop signs, shelf strips and door signs.'],
@@ -253,6 +256,7 @@
   let lastLayout = 'booklet';
   $$('input[name=layout]').forEach((r) => r.addEventListener('change', () => {
     const l = layoutValue();
+    if (l === 'single' && lastLayout !== 'single') $('#duplex').checked = false;
     if (l === 'banner' && lastLayout !== 'banner') { setDim('posterW', 72 * 72); setDim('posterH', 12 * 72); $('#keepShape').checked = false; }
     if (l === 'poster') {
       if (lastLayout === 'banner') { $('#keepShape').checked = true; setDim('posterW', 24 * 72); }

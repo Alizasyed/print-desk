@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1792977404">
+<link rel="stylesheet" href="style.css?v=1793629324">
 </head>
 <body>
 <a class="skip" href="#controls">Skip to settings</a>
@@ -73,6 +73,7 @@
         <label class="chip"><input type="radio" name="layout" value="booklet" checked><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="17" height="24" fill="#fff"/><rect x="24" y="4" width="17" height="24" fill="#fff"/><path d="M22 2v28" stroke-dasharray="2 2"/><path d="M7 11h9M7 15h9M28 11h9M28 15h9" stroke-width="1"/></svg><span class="txt"><b>Folded booklet</b><i>Zines, chapbooks, programmes. Staple the fold.</i></span></span></label>
         <label class="chip"><input type="radio" name="layout" value="zine"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="38" height="26" fill="#fff"/><path d="M12.5 3v26M22 3v26M31.5 3v26M3 16h38" stroke-dasharray="2 2" stroke-width="1"/><path d="M12.5 16h19" stroke="#FF5A1F" stroke-width="2.4"/></svg><span class="txt"><b>One-sheet zine</b><i>8 pages from one sheet, one cut</i></span></span></label>
         <label class="chip"><input type="radio" name="layout" value="trifold"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="38" height="22" fill="#fff"/><path d="M15.7 5v22M28.3 5v22" stroke-dasharray="2 2"/><path d="M7 12h5M7 16h5M20 12h5M20 16h5M32 12h5M32 16h5" stroke-width="1"/></svg><span class="txt"><b>Tri-fold</b><i>Menus, leaflets, price lists</i></span></span></label>
+        <label class="chip"><input type="radio" name="layout" value="single"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="12" y="3" width="20" height="26" fill="#fff"/><path d="M16 9h12M16 13h12M16 17h8" stroke-width="1"/></svg><span class="txt"><b>One per sheet</b><i>Each page on its own sheet, like normal printing</i></span></span></label>
         <label class="chip"><input type="radio" name="layout" value="nup"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="12" fill="#fff"/><rect x="24" y="3" width="16" height="12" fill="#fff"/><rect x="4" y="18" width="16" height="12" fill="#fff"/><rect x="24" y="18" width="16" height="12" fill="#fff"/></svg><span class="txt"><b>Multi-up</b><i>Cards, postcards, labels, handouts</i></span></span></label>
         <label class="chip"><input type="radio" name="layout" value="poster"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="12" height="12" fill="#fff"/><rect x="13" y="3" width="12" height="12" fill="#fff"/><rect x="23" y="3" width="12" height="12" fill="#fff"/><rect x="3" y="13" width="12" height="12" fill="#fff"/><rect x="13" y="13" width="12" height="12" fill="#fff"/><rect x="23" y="13" width="12" height="12" fill="#fff"/><path d="M9 20l5-6 5 6z" fill="#FF5A1F" stroke="none"/></svg><span class="txt"><b>Poster</b><i>Enlarge across tiled sheets</i></span></span></label>
         <label class="chip"><input type="radio" name="layout" value="banner"><span><svg class="ico" viewBox="0 0 44 32" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="11" width="40" height="10" fill="#fff"/><path d="M12 11v10M22 11v10M32 11v10" stroke-dasharray="2 2" stroke-width="1"/><path d="M6 16h28" stroke="#FF5A1F" stroke-width="2.4"/></svg><span class="txt"><b>Banner</b><i>Very wide or tall, cropped</i></span></span></label>
@@ -117,6 +118,9 @@
           </label>
           <label>Space for the staple <input class="dim" id="nupGutter" type="number" min="0" step="any" value="0"></label>
           <label class="check"><input type="checkbox" id="repeat"> Repeat the same page in every position (business cards, labels)</label>
+        </div>
+
+        <div class="opt" data-for="nup single">
           <label class="check"><input type="checkbox" id="duplex" checked> Print on both sides of each sheet</label>
           <label data-when="duplex">Printer flips on
             <select id="flip"><option value="long">Long edge</option><option value="short">Short edge</option></select>
@@ -167,34 +171,34 @@
     <section class="card">
       <h2><span class="n" aria-hidden="true">3</span>Page setup</h2>
       <div class="grid2">
-        <label data-for="nup poster banner">Sheet orientation
+        <label data-for="single nup poster banner">Sheet orientation
           <select id="orientation"><option value="auto">Automatic</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
         </label>
         <label class="custom">Custom width <input class="dim" id="customW" type="number" min="1" step="any" value="8.5"></label>
         <label class="custom">Custom height <input class="dim" id="customH" type="number" min="1" step="any" value="11"></label>
         <label>Printer margin <input class="dim" id="margin" type="number" min="0" step="any" value="0.25">
           <span class="hint">Most printers cannot print the last 0.25 in at each edge.</span></label>
-        <label data-for="booklet zine trifold nup">Space inside each page <input class="dim" id="pad" type="number" min="0" step="any" value="0"></label>
-        <label data-for="booklet zine trifold nup">Scaling
+        <label data-for="booklet zine trifold single nup">Space inside each page <input class="dim" id="pad" type="number" min="0" step="any" value="0"></label>
+        <label data-for="booklet zine trifold single nup">Scaling
           <select id="scaling"><option value="fit">Shrink to fit</option><option value="stretch">Stretch to fill</option><option value="none">Actual size (crop if larger)</option></select>
         </label>
         <label class="check"><input type="checkbox" id="reverse"> Print in reverse order</label>
       </div>
     </section>
 
-    <section class="card" data-for="booklet zine trifold nup poster banner" id="extras">
+    <section class="card" data-for="booklet zine trifold single nup poster banner" id="extras">
       <h2><span class="n" aria-hidden="true">4</span>Marks and page extras</h2>
       <div class="grid2">
-        <label>Fold and cut marks
+        <label data-for="booklet zine trifold nup poster banner">Fold and cut marks
           <select id="marks"><option value="ticks">Short ticks at the paper edge</option><option value="lines">Full lines</option><option value="none">None</option></select>
         </label>
-        <label class="check" data-for="booklet zine trifold nup"><input type="checkbox" id="border"> Thin border around each page</label>
-        <label class="check" data-for="booklet zine trifold nup"><input type="checkbox" id="pnOn"> Add page numbers</label>
-        <label data-for="booklet zine trifold nup">Number position
+        <label class="check" data-for="booklet zine trifold single nup"><input type="checkbox" id="border"> Thin border around each page</label>
+        <label class="check" data-for="booklet zine trifold single nup"><input type="checkbox" id="pnOn"> Add page numbers</label>
+        <label data-for="booklet zine trifold single nup">Number position
           <select id="pnPos"><option value="bc">Bottom centre</option><option value="bo">Bottom outer corner</option><option value="br">Bottom right</option><option value="bl">Bottom left</option><option value="tc">Top centre</option><option value="tr">Top right</option></select>
         </label>
       </div>
-      <div class="stamp" data-for="booklet zine trifold nup">
+      <div class="stamp" data-for="booklet zine trifold single nup">
         <label>Header <input id="headerText" type="text" placeholder="&lt;job&gt; &lt;date&gt; &lt;#&gt;"></label>
         <label>Footer <input id="footerText" type="text"></label>
         <label>Watermark <input id="wmText" type="text" placeholder="DRAFT"></label>
@@ -274,9 +278,9 @@
 
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
-<script src="imageutil.js?v=1792977404"></script>
-<script src="softproof.js?v=1792977404"></script>
-<script src="engine.js?v=1792977404"></script>
-<script src="app.js?v=1792977404"></script>
+<script src="imageutil.js?v=1793629324"></script>
+<script src="softproof.js?v=1793629324"></script>
+<script src="engine.js?v=1793629324"></script>
+<script src="app.js?v=1793629324"></script>
 </body>
 </html>
